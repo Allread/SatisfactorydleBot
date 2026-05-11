@@ -13,7 +13,9 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 
 public class Main {
@@ -70,6 +72,20 @@ public class Main {
         ).queue();
 
         System.out.println("Bot is ready! Logged in as " + jda.getSelfUser().getName());
+        System.out.println("Type 'stop' to shut down the bot.");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.equalsIgnoreCase("stop")) {
+                    System.out.println("Shutting down...");
+                    jda.shutdown();
+                    connection.disconnect();
+                    System.out.println("Bot stopped.");
+                    break;
+                }
+            }
+        }
     }
 
     private static OptionData createModeOption() {
