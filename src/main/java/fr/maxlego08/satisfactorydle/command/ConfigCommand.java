@@ -3,6 +3,7 @@ package fr.maxlego08.satisfactorydle.command;
 import fr.maxlego08.satisfactorydle.GameMode;
 import fr.maxlego08.satisfactorydle.GuildConfig;
 import fr.maxlego08.satisfactorydle.GuildConfigManager;
+import fr.maxlego08.satisfactorydle.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -18,9 +19,9 @@ public class ConfigCommand {
         this.guildConfigManager = guildConfigManager;
     }
 
-    public void execute(SlashCommandInteractionEvent event, String subcommand) {
+    public void execute(SlashCommandInteractionEvent event, String subcommand, Messages messages) {
         if (event.getMember() == null || !event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
-            replyError(event, "You need the **Manage Server** permission to configure the bot.");
+            replyError(event, messages, messages.get("error.no_permission"));
             return;
         }
 
@@ -28,44 +29,48 @@ public class ConfigCommand {
 
         try {
             switch (subcommand) {
-                case "language" -> handleLanguage(event, guildId);
-                case "mode" -> handleMode(event, guildId);
-                case "show" -> handleShow(event, guildId);
+                case "language" -> handleLanguage(event, guildId, messages);
+                case "mode" -> handleMode(event, guildId, messages);
+                case "show" -> handleShow(event, guildId, messages);
             }
         } catch (Exception e) {
-            replyError(event, "An unexpected error occurred: " + e.getMessage());
+            replyError(event, messages, messages.get("error.unexpected", "message", e.getMessage()));
         }
     }
 
-    private void handleLanguage(SlashCommandInteractionEvent event, String guildId) {
+    private void handleLanguage(SlashCommandInteractionEvent event, String guildId, Messages messages) {
         String locale = event.getOption("locale", OptionMapping::getAsString);
         guildConfigManager.setLocale(guildId, locale);
 
         event.getHook().editOriginalEmbeds(
                 new EmbedBuilder()
                         .setColor(COLOR_SUCCESS)
-                        .setTitle("Configuration Updated")
-                        .setDescription("Language set to **" + locale + "**")
+                        .setTitle(messages.get("config.updated_title"))
+                        .setDescription(messages.get("config.language_set", "locale", locale))
                         .build()
         ).queue();
     }
 
-    private void handleMode(SlashCommandInteractionEvent event, String guildId) {
+    private void handleMode(SlashCommandInteractionEvent event, String guildId, Messages messages) {
         String mode = event.getOption("mode", OptionMapping::getAsString);
         boolean enabled = event.getOption("enabled", OptionMapping::getAsBoolean);
         guildConfigManager.setModeEnabled(guildId, mode, enabled);
 
+        String modeDisplay = GameMode.fromKey(mode).getDisplay();
+        String description = enabled
+                ? messages.get("config.mode_enabled", "mode", modeDisplay)
+                : messages.get("config.mode_disabled", "mode", modeDisplay);
+
         event.getHook().editOriginalEmbeds(
                 new EmbedBuilder()
                         .setColor(COLOR_SUCCESS)
-                        .setTitle("Configuration Updated")
-                        .setDescription("Mode **" + GameMode.fromKey(mode).getDisplay()
-                                + "** is now " + (enabled ? "enabled" : "disabled"))
+                        .setTitle(messages.get("config.updated_title"))
+                        .setDescription(description)
                         .build()
         ).queue();
     }
 
-    private void handleShow(SlashCommandInteractionEvent event, String guildId) {
+    private void handleShow(SlashCommandInteractionEvent event, String guildId, Messages messages) {
         GuildConfig config = guildConfigManager.getConfig(guildId);
 
         StringBuilder modes = new StringBuilder();
@@ -77,9 +82,9 @@ public class ConfigCommand {
         event.getHook().editOriginalEmbeds(
                 new EmbedBuilder()
                         .setColor(COLOR_INFO)
-                        .setTitle("Server Configuration")
-                        .addField("Language", config.getLocale(), true)
-                        .addField("Active Modes", modes.toString(), false)
+                        .setTitle(messages.get("config.show_title"))
+                        .addField(messages.get("config.language_field"), config.getLocale(), true)
+                        .addField(messages.get("config.modes_field"), modes.toString(), false)
                         .build()
         ).queue();
     }

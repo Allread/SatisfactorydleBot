@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.ApiException;
 import fr.maxlego08.satisfactorydle.GameMode;
+import fr.maxlego08.satisfactorydle.Messages;
 import fr.maxlego08.satisfactorydle.SatisfactorydleAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -18,8 +19,9 @@ public class ScoreCommand {
         this.api = api;
     }
 
-    public void execute(SlashCommandInteractionEvent event, String mode, String locale) throws Exception {
+    public void execute(SlashCommandInteractionEvent event, String mode, String locale, Messages messages) throws Exception {
         String userId = event.getUser().getId();
+        String modeDisplay = GameMode.fromKey(mode).getDisplay();
 
         try {
             JsonObject state = api.getState(mode, userId, locale);
@@ -30,10 +32,10 @@ public class ScoreCommand {
 
             EmbedBuilder embed = new EmbedBuilder()
                     .setColor(won ? COLOR_SUCCESS : COLOR_INFO)
-                    .setTitle("Score - " + GameMode.fromKey(mode).getDisplay() + " #" + gameId);
+                    .setTitle(messages.get("score.title", "mode", modeDisplay, "id", gameId));
 
-            embed.addField("Status", won ? "Won!" : "In Progress", true);
-            embed.addField("Guesses", String.valueOf(totalGuesses), true);
+            embed.addField(messages.get("score.status"), won ? messages.get("score.won") : messages.get("score.in_progress"), true);
+            embed.addField(messages.get("score.guesses_field"), String.valueOf(totalGuesses), true);
 
             if (state.has("guesses") && state.get("guesses").isJsonArray()) {
                 JsonArray guesses = state.getAsJsonArray("guesses");
@@ -46,12 +48,12 @@ public class ScoreCommand {
                                 .append(correct ? "✅" : "❌").append(" ")
                                 .append(g.get("name").getAsString()).append("\n");
                     }
-                    embed.addField("Your Guesses", sb.toString(), false);
+                    embed.addField(messages.get("score.your_guesses"), sb.toString(), false);
                 }
             }
 
             if (state.has("hints") && !state.get("hints").isJsonNull()) {
-                addHintFields(embed, state.getAsJsonObject("hints"));
+                addHintFields(embed, state.getAsJsonObject("hints"), messages);
             }
 
             if (won && state.has("answer") && !state.get("answer").isJsonNull()) {
@@ -61,15 +63,15 @@ public class ScoreCommand {
                 }
             }
 
-            embed.setFooter(won ? "Come back tomorrow!" : "Use /sfdle guess to continue!");
+            embed.setFooter(won ? messages.get("score.footer_won") : messages.get("score.footer_playing"));
             event.getHook().editOriginalEmbeds(embed.build()).queue();
         } catch (ApiException e) {
             if (e.getStatusCode() == 404) {
                 event.getHook().editOriginalEmbeds(
                         new EmbedBuilder()
                                 .setColor(COLOR_INFO)
-                                .setTitle("Score - " + GameMode.fromKey(mode).getDisplay())
-                                .setDescription("You haven't started today's challenge yet!\nUse `/sfdle start` to see today's puzzle.")
+                                .setTitle(messages.get("score.title_no_game", "mode", modeDisplay))
+                                .setDescription(messages.get("score.no_game"))
                                 .build()
                 ).queue();
             } else {

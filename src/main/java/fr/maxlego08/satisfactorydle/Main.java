@@ -38,7 +38,8 @@ public class Main {
 
         // Bot setup
         SatisfactorydleAPI api = new SatisfactorydleAPI(config);
-        CommandListener listener = new CommandListener(api, guildConfigManager, config.locale());
+        MessageManager messageManager = new MessageManager(config.locale());
+        CommandListener listener = new CommandListener(api, guildConfigManager, messageManager, config.locale());
 
         JDA jda = JDABuilder.createLight(config.discordToken())
                 .addEventListeners(listener)

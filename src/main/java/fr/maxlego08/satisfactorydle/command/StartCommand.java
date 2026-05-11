@@ -3,6 +3,7 @@ package fr.maxlego08.satisfactorydle.command;
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.ApiException;
 import fr.maxlego08.satisfactorydle.GameMode;
+import fr.maxlego08.satisfactorydle.Messages;
 import fr.maxlego08.satisfactorydle.SatisfactorydleAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -19,13 +20,14 @@ public class StartCommand {
         this.entityCache = entityCache;
     }
 
-    public void execute(SlashCommandInteractionEvent event, String mode, String locale) throws Exception {
+    public void execute(SlashCommandInteractionEvent event, String mode, String locale, Messages messages) throws Exception {
         JsonObject daily = api.getDaily(mode, locale);
         entityCache.store(entityCache.cacheKey(mode, locale), daily.getAsJsonArray("entities"));
 
+        String modeDisplay = GameMode.fromKey(mode).getDisplay();
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(COLOR_INFO)
-                .setTitle("Satisfactorydle - " + GameMode.fromKey(mode).getDisplay());
+                .setTitle(messages.get("start.title", "mode", modeDisplay));
 
         try {
             JsonObject yesterday = api.getYesterday(mode, locale);
@@ -37,14 +39,14 @@ public class StartCommand {
             if (hasValue(answer, "description")) {
                 text.append("\n").append(answer.get("description").getAsString());
             }
-            embed.addField("Yesterday's Answer (#" + gameId + ")", text.toString(), false);
+            embed.addField(messages.get("start.yesterday_field", "id", gameId), text.toString(), false);
 
             if (hasValue(answer, "image_url")) {
                 embed.setThumbnail(answer.get("image_url").getAsString());
             }
         } catch (ApiException e) {
             if (e.getStatusCode() == 404) {
-                embed.addField("Yesterday", "No puzzle from yesterday.", false);
+                embed.addField(messages.get("start.yesterday_field", "id", "?"), messages.get("start.yesterday_none"), false);
             } else {
                 throw e;
             }
@@ -53,21 +55,19 @@ public class StartCommand {
         int gameId = daily.get("game_id").getAsInt();
         JsonObject clue = daily.getAsJsonObject("clue");
 
-        StringBuilder todayText = new StringBuilder()
-                .append("Game **#").append(gameId).append("** is ready!\n")
-                .append("Use `/sfdle guess` to make your first guess.");
+        StringBuilder todayText = new StringBuilder(messages.get("start.today_text", "id", gameId));
 
         if (hasValue(clue, "description")) {
-            todayText.append("\n\n**Clue:** ").append(clue.get("description").getAsString());
+            todayText.append(messages.get("start.clue_prefix", "clue", clue.get("description").getAsString()));
         }
 
-        embed.addField("Today's Challenge", todayText.toString(), false);
+        embed.addField(messages.get("start.today_field"), todayText.toString(), false);
 
         if (hasValue(clue, "image_url")) {
             embed.setImage(clue.get("image_url").getAsString());
         }
 
-        embed.setFooter("Good luck!");
+        embed.setFooter(messages.get("start.footer"));
         event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
 }

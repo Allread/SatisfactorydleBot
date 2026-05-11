@@ -19,6 +19,7 @@ import static fr.maxlego08.satisfactorydle.command.EmbedHelper.replyError;
 public class CommandListener extends ListenerAdapter {
 
     private final GuildConfigManager guildConfigManager;
+    private final MessageManager messageManager;
     private final String defaultLocale;
     private final EntityCache entityCache;
 
@@ -27,8 +28,9 @@ public class CommandListener extends ListenerAdapter {
     private final ScoreCommand scoreCommand;
     private final ConfigCommand configCommand;
 
-    public CommandListener(SatisfactorydleAPI api, GuildConfigManager guildConfigManager, String defaultLocale) {
+    public CommandListener(SatisfactorydleAPI api, GuildConfigManager guildConfigManager, MessageManager messageManager, String defaultLocale) {
         this.guildConfigManager = guildConfigManager;
+        this.messageManager = messageManager;
         this.defaultLocale = defaultLocale;
         this.entityCache = new EntityCache(api);
 
@@ -48,31 +50,33 @@ public class CommandListener extends ListenerAdapter {
 
         event.deferReply().setEphemeral(true).queue();
 
+        String locale = getLocale(event);
+        Messages messages = messageManager.forLocale(locale);
+
         if ("config".equals(group)) {
-            configCommand.execute(event, subcommand);
+            configCommand.execute(event, subcommand, messages);
             return;
         }
 
-        String locale = getLocale(event);
         String mode = event.getOption("mode", "item", OptionMapping::getAsString);
 
         GuildConfig guildConfig = getGuildConfig(event);
         if (guildConfig != null && !guildConfig.isModeActive(mode)) {
-            replyError(event, "The **" + GameMode.fromKey(mode).getDisplay()
-                    + "** mode is disabled on this server.\nAn administrator can enable it with `/sfdle config mode`.");
+            replyError(event, messages, messages.get("error.mode_disabled",
+                    "mode", GameMode.fromKey(mode).getDisplay()));
             return;
         }
 
         try {
             switch (subcommand) {
-                case "start" -> startCommand.execute(event, mode, locale);
-                case "guess" -> guessCommand.execute(event, mode, locale);
-                case "score" -> scoreCommand.execute(event, mode, locale);
+                case "start" -> startCommand.execute(event, mode, locale, messages);
+                case "guess" -> guessCommand.execute(event, mode, locale, messages);
+                case "score" -> scoreCommand.execute(event, mode, locale, messages);
             }
         } catch (ApiException e) {
-            replyError(event, e.getMessage());
+            replyError(event, messages, e.getMessage());
         } catch (Exception e) {
-            replyError(event, "An unexpected error occurred: " + e.getMessage());
+            replyError(event, messages, messages.get("error.unexpected", "message", e.getMessage()));
         }
     }
 

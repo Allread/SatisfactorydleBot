@@ -1,0 +1,79 @@
+{
+  "error": {
+    "title": "Erreur",
+    "unexpected": "Une erreur inattendue est survenue : {message}",
+    "mode_disabled": "Le mode **{mode}** est desactive sur ce serveur.\nUn administrateur peut l'activer avec `/sfdle config mode`.",
+    "entity_not_found": "\"{name}\" n'est pas dans la liste.\nUtilisez l'autocompletion pour selectionner une entite valide.",
+    "no_permission": "Vous avez besoin de la permission **Gerer le serveur** pour configurer le bot."
+  },
+  "common": {
+    "yes": "Oui",
+    "no": "Non",
+    "guess": "essai",
+    "guesses": "essais"
+  },
+  "start": {
+    "title": "Satisfactorydle - {mode}",
+    "yesterday_field": "Reponse d'hier (#{id})",
+    "yesterday_none": "Pas de puzzle d'hier.",
+    "today_field": "Defi du jour",
+    "today_text": "Partie **#{id}** prete !\nUtilisez `/sfdle guess` pour faire votre premiere proposition.",
+    "clue_prefix": "\n\n**Indice :** {clue}",
+    "footer": "Bonne chance !"
+  },
+  "guess": {
+    "correct_title": "Correct !",
+    "correct_description": "Vous avez trouve **{name}** en **{count}** {guess_word} !",
+    "correct_footer": "Felicitations ! Revenez demain pour un nouveau defi.",
+    "wrong_title": "Faux - {name}",
+    "wrong_description": "Essai **#{number}** - Ce n'est pas la bonne reponse !",
+    "wrong_footer": "Utilisez /sfdle guess pour reessayer !",
+    "already_won_title": "Deja gagne !",
+    "duplicate_title": "Proposition en double"
+  },
+  "score": {
+    "title": "Score - {mode} #{id}",
+    "title_no_game": "Score - {mode}",
+    "no_game": "Vous n'avez pas encore commence le defi du jour !\nUtilisez `/sfdle start` pour voir le puzzle du jour.",
+    "status": "Statut",
+    "won": "Gagne !",
+    "in_progress": "En cours",
+    "guesses_field": "Essais",
+    "your_guesses": "Vos essais",
+    "footer_won": "Revenez demain !",
+    "footer_playing": "Utilisez /sfdle guess pour continuer !"
+  },
+  "hints": {
+    "title": "Indices",
+    "locked_title": "Indices verrouilles",
+    "image_revealed": "Revelee",
+    "unlock_in": "se deverrouille dans {remaining} {guess_word}"
+  },
+  "config": {
+    "updated_title": "Configuration mise a jour",
+    "language_set": "Langue definie sur **{locale}**",
+    "mode_enabled": "Le mode **{mode}** est maintenant active",
+    "mode_disabled": "Le mode **{mode}** est maintenant desactive",
+    "show_title": "Configuration du serveur",
+    "language_field": "Langue",
+    "modes_field": "Modes actifs"
+  },
+  "field": {
+    "category": "Categorie",
+    "tier": "Palier",
+    "form": "Forme",
+    "stack_size": "Taille de pile",
+    "sink_points": "Points de recyclage",
+    "power": "Consommation",
+    "building": "Batiment",
+    "alternate": "Alternatif",
+    "hostility": "Hostilite",
+    "biome": "Biome",
+    "type": "Type",
+    "source": "Source",
+    "unlocked_items": "Objets debloques",
+    "description": "Description",
+    "input_items": "Composants",
+    "total_guesses": "Total d'essais"
+  }
+}

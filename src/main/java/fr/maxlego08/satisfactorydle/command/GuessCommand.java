@@ -2,6 +2,7 @@ package fr.maxlego08.satisfactorydle.command;
 
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.ApiException;
+import fr.maxlego08.satisfactorydle.Messages;
 import fr.maxlego08.satisfactorydle.SatisfactorydleAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -21,7 +22,7 @@ public class GuessCommand {
         this.entityCache = entityCache;
     }
 
-    public void execute(SlashCommandInteractionEvent event, String mode, String locale) throws Exception {
+    public void execute(SlashCommandInteractionEvent event, String mode, String locale, Messages messages) throws Exception {
         String entityName = event.getOption("entity", OptionMapping::getAsString);
         if (entityName == null) return;
 
@@ -34,7 +35,7 @@ public class GuessCommand {
                 : null;
 
         if (entity == null) {
-            replyError(event, "\"" + entityName + "\" is not in the list.\nUse autocomplete to select a valid entity.");
+            replyError(event, messages, messages.get("error.entity_not_found", "name", entityName));
             return;
         }
 
@@ -48,32 +49,35 @@ public class GuessCommand {
 
             if (correct) {
                 JsonObject answer = result.getAsJsonObject("answer");
+                String guessWord = totalGuesses > 1 ? messages.get("common.guesses") : messages.get("common.guess");
                 EmbedBuilder embed = new EmbedBuilder()
                         .setColor(COLOR_SUCCESS)
-                        .setTitle("Correct!")
-                        .setDescription("You found **" + answer.get("name").getAsString()
-                                + "** in **" + totalGuesses + "** guess" + (totalGuesses > 1 ? "es" : "") + "!");
+                        .setTitle(messages.get("guess.correct_title"))
+                        .setDescription(messages.get("guess.correct_description",
+                                "name", answer.get("name").getAsString(),
+                                "count", totalGuesses,
+                                "guess_word", guessWord));
 
-                addAnswerFields(embed, answer, mode);
+                addAnswerFields(embed, answer, mode, messages);
 
                 if (hasValue(answer, "image_url")) {
                     embed.setThumbnail(answer.get("image_url").getAsString());
                 }
 
-                embed.setFooter("Congratulations! Come back tomorrow for a new challenge.");
+                embed.setFooter(messages.get("guess.correct_footer"));
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             } else {
                 int guessNumber = result.get("guess_number").getAsInt();
                 EmbedBuilder embed = new EmbedBuilder()
                         .setColor(COLOR_ERROR)
-                        .setTitle("Wrong - " + entityName)
-                        .setDescription("Guess **#" + guessNumber + "** - Not the right answer!");
+                        .setTitle(messages.get("guess.wrong_title", "name", entityName))
+                        .setDescription(messages.get("guess.wrong_description", "number", guessNumber));
 
                 if (result.has("hints") && !result.get("hints").isJsonNull()) {
-                    addHintFields(embed, result.getAsJsonObject("hints"));
+                    addHintFields(embed, result.getAsJsonObject("hints"), messages);
                 }
 
-                embed.setFooter("Use /sfdle guess to try again!");
+                embed.setFooter(messages.get("guess.wrong_footer"));
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             }
         } catch (ApiException e) {
@@ -83,11 +87,11 @@ public class GuessCommand {
 
                 EmbedBuilder embed = new EmbedBuilder()
                         .setColor(COLOR_WARNING)
-                        .setTitle(won ? "Already Won!" : "Duplicate Guess")
+                        .setTitle(won ? messages.get("guess.already_won_title") : messages.get("guess.duplicate_title"))
                         .setDescription(e.getMessage());
 
                 if (won && body.has("total_guesses")) {
-                    embed.addField("Total Guesses", String.valueOf(body.get("total_guesses").getAsInt()), true);
+                    embed.addField(messages.get("field.total_guesses"), String.valueOf(body.get("total_guesses").getAsInt()), true);
                 }
 
                 event.getHook().editOriginalEmbeds(embed.build()).queue();

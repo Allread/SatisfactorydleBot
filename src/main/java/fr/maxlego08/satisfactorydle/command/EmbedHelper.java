@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import fr.maxlego08.satisfactorydle.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -18,57 +19,58 @@ public final class EmbedHelper {
 
     private EmbedHelper() {}
 
-    public static void replyError(SlashCommandInteractionEvent event, String message) {
+    public static void replyError(SlashCommandInteractionEvent event, Messages messages, String message) {
         event.getHook().editOriginalEmbeds(
                 new EmbedBuilder()
                         .setColor(COLOR_ERROR)
-                        .setTitle("Error")
+                        .setTitle(messages.get("error.title"))
                         .setDescription(message)
                         .build()
         ).queue();
     }
 
-    public static void addAnswerFields(EmbedBuilder embed, JsonObject answer, String mode) {
+    public static void addAnswerFields(EmbedBuilder embed, JsonObject answer, String mode, Messages messages) {
         switch (mode) {
             case "item" -> {
-                addFieldIfPresent(embed, "Category", answer, "category", true);
-                addFieldIfPresent(embed, "Tier", answer, "tier", true);
-                addFieldIfPresent(embed, "Form", answer, "form", true);
-                addFieldIfPresent(embed, "Stack Size", answer, "stack_size", true);
-                addFieldIfPresent(embed, "Sink Points", answer, "sink_points", true);
+                addFieldIfPresent(embed, messages.get("field.category"), answer, "category", true);
+                addFieldIfPresent(embed, messages.get("field.tier"), answer, "tier", true);
+                addFieldIfPresent(embed, messages.get("field.form"), answer, "form", true);
+                addFieldIfPresent(embed, messages.get("field.stack_size"), answer, "stack_size", true);
+                addFieldIfPresent(embed, messages.get("field.sink_points"), answer, "sink_points", true);
             }
             case "building" -> {
-                addFieldIfPresent(embed, "Category", answer, "category", true);
-                addFieldIfPresent(embed, "Tier", answer, "tier", true);
-                addFieldIfPresent(embed, "Power", answer, "power_consumption", true);
+                addFieldIfPresent(embed, messages.get("field.category"), answer, "category", true);
+                addFieldIfPresent(embed, messages.get("field.tier"), answer, "tier", true);
+                addFieldIfPresent(embed, messages.get("field.power"), answer, "power_consumption", true);
             }
             case "recipe" -> {
-                addFieldIfPresent(embed, "Building", answer, "building", true);
+                addFieldIfPresent(embed, messages.get("field.building"), answer, "building", true);
                 if (answer.has("is_alternate") && !answer.get("is_alternate").isJsonNull()) {
-                    embed.addField("Alternate", answer.get("is_alternate").getAsBoolean() ? "Yes" : "No", true);
+                    embed.addField(messages.get("field.alternate"),
+                            answer.get("is_alternate").getAsBoolean() ? messages.get("common.yes") : messages.get("common.no"), true);
                 }
-                addInputItems(embed, answer);
+                addInputItems(embed, answer, messages);
             }
             case "creature" -> {
-                addFieldIfPresent(embed, "Hostility", answer, "hostility", true);
-                addFieldIfPresent(embed, "Biome", answer, "biome", true);
-                addFieldIfPresent(embed, "Type", answer, "type", true);
+                addFieldIfPresent(embed, messages.get("field.hostility"), answer, "hostility", true);
+                addFieldIfPresent(embed, messages.get("field.biome"), answer, "biome", true);
+                addFieldIfPresent(embed, messages.get("field.type"), answer, "type", true);
             }
             case "milestone" -> {
-                addFieldIfPresent(embed, "Source", answer, "source", true);
-                addFieldIfPresent(embed, "Tier", answer, "tier", true);
-                addFieldIfPresent(embed, "Unlocked Items", answer, "unlocked_items_count", true);
+                addFieldIfPresent(embed, messages.get("field.source"), answer, "source", true);
+                addFieldIfPresent(embed, messages.get("field.tier"), answer, "tier", true);
+                addFieldIfPresent(embed, messages.get("field.unlocked_items"), answer, "unlocked_items_count", true);
             }
         }
 
         if (hasValue(answer, "description")) {
             String desc = answer.get("description").getAsString();
             if (desc.length() > 200) desc = desc.substring(0, 200) + "...";
-            embed.addField("Description", desc, false);
+            embed.addField(messages.get("field.description"), desc, false);
         }
     }
 
-    public static void addHintFields(EmbedBuilder embed, JsonObject hints) {
+    public static void addHintFields(EmbedBuilder embed, JsonObject hints, Messages messages) {
         StringBuilder unlocked = new StringBuilder();
         StringBuilder locked = new StringBuilder();
 
@@ -82,14 +84,15 @@ public final class EmbedHelper {
             if (key.equals("reveal_image")) {
                 if (value.getAsBoolean() && hasValue(hints, "image_url")) {
                     embed.setImage(hints.get("image_url").getAsString());
-                    unlocked.append("**Image:** Revealed\n");
+                    unlocked.append("**Image:** ").append(messages.get("hints.image_revealed")).append("\n");
                 }
             } else if (key.equals("is_alternate")) {
-                unlocked.append("**").append(label).append(":** ").append(value.getAsBoolean() ? "Yes" : "No").append("\n");
+                unlocked.append("**").append(label).append(":** ")
+                        .append(value.getAsBoolean() ? messages.get("common.yes") : messages.get("common.no")).append("\n");
             } else if (value.isJsonArray()) {
                 unlocked.append("**").append(label).append(":** ").append(formatJsonArray(value.getAsJsonArray())).append("\n");
             } else {
-                unlocked.append("**").append(label).append(":** ").append(jsonToString(value)).append("\n");
+                unlocked.append("**").append(label).append(":** ").append(jsonToString(value, messages)).append("\n");
             }
         }
 
@@ -98,20 +101,22 @@ public final class EmbedHelper {
                 JsonObject lock = item.getAsJsonObject();
                 String label = lock.get("label").getAsString();
                 int remaining = lock.get("remaining").getAsInt();
-                locked.append("**").append(label).append("** - unlocks in ").append(remaining)
-                        .append(" guess").append(remaining > 1 ? "es" : "").append("\n");
+                String guessWord = remaining > 1 ? messages.get("common.guesses") : messages.get("common.guess");
+                locked.append("**").append(label).append("** - ")
+                        .append(messages.get("hints.unlock_in", "remaining", remaining, "guess_word", guessWord))
+                        .append("\n");
             }
         }
 
         if (!unlocked.isEmpty()) {
-            embed.addField("Hints", unlocked.toString(), false);
+            embed.addField(messages.get("hints.title"), unlocked.toString(), false);
         }
         if (!locked.isEmpty()) {
-            embed.addField("Locked Hints", locked.toString(), false);
+            embed.addField(messages.get("hints.locked_title"), locked.toString(), false);
         }
     }
 
-    public static void addInputItems(EmbedBuilder embed, JsonObject json) {
+    public static void addInputItems(EmbedBuilder embed, JsonObject json, Messages messages) {
         if (!json.has("input_items") || !json.get("input_items").isJsonArray()) return;
         JsonArray inputs = json.getAsJsonArray("input_items");
         if (inputs.isEmpty()) return;
@@ -123,12 +128,12 @@ public final class EmbedHelper {
             if (item.has("amount")) sb.append(" x").append(item.get("amount").getAsInt());
             sb.append("\n");
         }
-        embed.addField("Input Items", sb.toString(), false);
+        embed.addField(messages.get("field.input_items"), sb.toString(), false);
     }
 
     public static void addFieldIfPresent(EmbedBuilder embed, String label, JsonObject json, String key, boolean inline) {
         if (hasValue(json, key)) {
-            embed.addField(label, jsonToString(json.get(key)), inline);
+            embed.addField(label, jsonToStringRaw(json.get(key)), inline);
         }
     }
 
@@ -136,7 +141,17 @@ public final class EmbedHelper {
         return json.has(key) && !json.get(key).isJsonNull();
     }
 
-    public static String jsonToString(JsonElement element) {
+    public static String jsonToString(JsonElement element, Messages messages) {
+        if (element.isJsonPrimitive()) {
+            JsonPrimitive prim = element.getAsJsonPrimitive();
+            if (prim.isBoolean()) return prim.getAsBoolean() ? messages.get("common.yes") : messages.get("common.no");
+            if (prim.isNumber()) return prim.getAsNumber().toString();
+            return prim.getAsString();
+        }
+        return element.toString();
+    }
+
+    public static String jsonToStringRaw(JsonElement element) {
         if (element.isJsonPrimitive()) {
             JsonPrimitive prim = element.getAsJsonPrimitive();
             if (prim.isBoolean()) return prim.getAsBoolean() ? "Yes" : "No";
@@ -155,7 +170,7 @@ public final class EmbedHelper {
                 sb.append(obj.get("slug").getAsString());
                 if (obj.has("amount")) sb.append(" x").append(obj.get("amount").getAsInt());
             } else {
-                sb.append(jsonToString(element));
+                sb.append(jsonToStringRaw(element));
             }
         }
         return sb.toString();
