@@ -42,13 +42,12 @@ public class ConfigCommand {
         String locale = event.getOption("locale", OptionMapping::getAsString);
         guildConfigManager.setLocale(guildId, locale);
 
-        event.getHook().editOriginalEmbeds(
-                new EmbedBuilder()
-                        .setColor(COLOR_SUCCESS)
-                        .setTitle(messages.get("config.updated_title"))
-                        .setDescription(messages.get("config.language_set", "locale", locale))
-                        .build()
-        ).queue();
+        EmbedBuilder embed = new EmbedBuilder()
+                .setColor(COLOR_SUCCESS)
+                .setTitle(messages.get("config.updated_title"))
+                .setDescription(messages.get("config.language_set", "locale", locale));
+        applyFooter(embed, null);
+        event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
 
     private void handleMode(SlashCommandInteractionEvent event, String guildId, Messages messages) {
@@ -61,13 +60,12 @@ public class ConfigCommand {
                 ? messages.get("config.mode_enabled", "mode", modeDisplay)
                 : messages.get("config.mode_disabled", "mode", modeDisplay);
 
-        event.getHook().editOriginalEmbeds(
-                new EmbedBuilder()
-                        .setColor(COLOR_SUCCESS)
-                        .setTitle(messages.get("config.updated_title"))
-                        .setDescription(description)
-                        .build()
-        ).queue();
+        EmbedBuilder embed = new EmbedBuilder()
+                .setColor(COLOR_SUCCESS)
+                .setTitle(messages.get("config.updated_title"))
+                .setDescription(description);
+        applyFooter(embed, null);
+        event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
 
     private void handleShow(SlashCommandInteractionEvent event, String guildId, Messages messages) {
@@ -79,13 +77,12 @@ public class ConfigCommand {
             modes.append(active ? "✅" : "❌").append(" ").append(gm.getDisplay()).append("\n");
         }
 
-        event.getHook().editOriginalEmbeds(
-                new EmbedBuilder()
-                        .setColor(COLOR_INFO)
-                        .setTitle(messages.get("config.show_title"))
-                        .addField(messages.get("config.language_field"), config.getLocale(), true)
-                        .addField(messages.get("config.modes_field"), modes.toString(), false)
-                        .build()
-        ).queue();
+        EmbedBuilder embed = new EmbedBuilder()
+                .setColor(COLOR_INFO)
+                .setTitle(messages.get("config.show_title"))
+                .addField(messages.get("config.language_field"), config.getLocale(), true)
+                .addField(messages.get("config.modes_field"), modes.toString(), false);
+        applyFooter(embed, null);
+        event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
 }

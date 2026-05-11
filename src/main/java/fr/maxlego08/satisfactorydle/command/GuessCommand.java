@@ -64,7 +64,7 @@ public class GuessCommand {
                     embed.setThumbnail(answer.get("image_url").getAsString());
                 }
 
-                embed.setFooter(messages.get("guess.correct_footer"));
+                applyFooter(embed, messages.get("guess.correct_footer"));
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             } else {
                 int guessNumber = result.get("guess_number").getAsInt();
@@ -77,7 +77,7 @@ public class GuessCommand {
                     addHintFields(embed, result.getAsJsonObject("hints"), messages);
                 }
 
-                embed.setFooter(messages.get("guess.wrong_footer"));
+                applyFooter(embed, messages.get("guess.wrong_footer"));
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             }
         } catch (ApiException e) {
@@ -94,6 +94,7 @@ public class GuessCommand {
                     embed.addField(messages.get("field.total_guesses"), String.valueOf(body.get("total_guesses").getAsInt()), true);
                 }
 
+                applyFooter(embed, null);
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             } else {
                 throw e;

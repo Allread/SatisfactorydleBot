@@ -63,17 +63,16 @@ public class ScoreCommand {
                 }
             }
 
-            embed.setFooter(won ? messages.get("score.footer_won") : messages.get("score.footer_playing"));
+            applyFooter(embed, won ? messages.get("score.footer_won") : messages.get("score.footer_playing"));
             event.getHook().editOriginalEmbeds(embed.build()).queue();
         } catch (ApiException e) {
             if (e.getStatusCode() == 404) {
-                event.getHook().editOriginalEmbeds(
-                        new EmbedBuilder()
-                                .setColor(COLOR_INFO)
-                                .setTitle(messages.get("score.title_no_game", "mode", modeDisplay))
-                                .setDescription(messages.get("score.no_game"))
-                                .build()
-                ).queue();
+                EmbedBuilder noGameEmbed = new EmbedBuilder()
+                        .setColor(COLOR_INFO)
+                        .setTitle(messages.get("score.title_no_game", "mode", modeDisplay))
+                        .setDescription(messages.get("score.no_game"));
+                applyFooter(noGameEmbed, null);
+                event.getHook().editOriginalEmbeds(noGameEmbed.build()).queue();
             } else {
                 throw e;
             }

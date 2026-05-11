@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.awt.Color;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public final class EmbedHelper {
 
@@ -17,16 +19,26 @@ public final class EmbedHelper {
     public static final Color COLOR_WARNING = new Color(0xFEE75C);
     public static final Color COLOR_INFO = new Color(0x5865F2);
 
+    private static final String FOOTER_ICON = "https://satisfactorydle.net/favicon.svg";
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private EmbedHelper() {}
 
+    public static void applyFooter(EmbedBuilder embed, String text) {
+        String date = LocalDate.now().format(DATE_FORMAT);
+        String footer = text != null && !text.isEmpty()
+                ? text + " | satisfactorydle.net | " + date
+                : "satisfactorydle.net | " + date;
+        embed.setFooter(footer, FOOTER_ICON);
+    }
+
     public static void replyError(SlashCommandInteractionEvent event, Messages messages, String message) {
-        event.getHook().editOriginalEmbeds(
-                new EmbedBuilder()
-                        .setColor(COLOR_ERROR)
-                        .setTitle(messages.get("error.title"))
-                        .setDescription(message)
-                        .build()
-        ).queue();
+        EmbedBuilder embed = new EmbedBuilder()
+                .setColor(COLOR_ERROR)
+                .setTitle(messages.get("error.title"))
+                .setDescription(message);
+        applyFooter(embed, null);
+        event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
 
     public static void addAnswerFields(EmbedBuilder embed, JsonObject answer, String mode, Messages messages) {

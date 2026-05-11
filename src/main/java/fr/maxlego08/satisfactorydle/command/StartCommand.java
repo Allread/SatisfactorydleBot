@@ -67,7 +67,7 @@ public class StartCommand {
             embed.setImage(clue.get("image_url").getAsString());
         }
 
-        embed.setFooter(messages.get("start.footer"));
+        applyFooter(embed, messages.get("start.footer"));
         event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
 }
