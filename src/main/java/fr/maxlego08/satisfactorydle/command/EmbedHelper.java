@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 public final class EmbedHelper {
 
@@ -21,6 +23,13 @@ public final class EmbedHelper {
 
     private static final String FOOTER_ICON = "https://satisfactorydle.net/favicon-96x96.png";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    private static final Map<String, String> COLUMN_TO_FIELD_KEY = Map.of(
+            "power_consumption", "power",
+            "is_alternate", "alternate",
+            "unlocked_items_count", "unlocked_items",
+            "used_in_count", "used_in_count"
+    );
 
     private EmbedHelper() {
     }
@@ -39,6 +48,14 @@ public final class EmbedHelper {
 
     public static void addAnswerFields(EmbedBuilder embed, JsonObject answer, String mode, Messages messages) {
         switch (mode) {
+            case "classic" -> {
+                addFieldIfPresent(embed, messages.get("field.category"), answer, "category", true);
+                addFieldIfPresent(embed, messages.get("field.tier"), answer, "tier", true);
+                addFieldIfPresent(embed, messages.get("field.stack_size"), answer, "stack_size", true);
+                addFieldIfPresent(embed, messages.get("field.form"), answer, "form", true);
+                addFieldIfPresent(embed, messages.get("field.sink_points"), answer, "sink_points", true);
+                addFieldIfPresent(embed, messages.get("field.used_in_count"), answer, "used_in_count", true);
+            }
             case "item" -> {
                 addFieldIfPresent(embed, messages.get("field.category"), answer, "category", true);
                 addFieldIfPresent(embed, messages.get("field.tier"), answer, "tier", true);
@@ -183,5 +200,84 @@ public final class EmbedHelper {
     public static String formatLabel(String key) {
         String result = key.replace("_", " ");
         return result.substring(0, 1).toUpperCase() + result.substring(1);
+    }
+
+    public static void addGuessHistory(EmbedBuilder embed, JsonArray guesses, String mode, Messages messages) {
+        if (guesses.isEmpty()) return;
+
+        List<String> columns = getComparisonColumns(mode);
+        if (columns.isEmpty()) return;
+
+        // Column headers in italics
+        StringBuilder header = new StringBuilder("*");
+        for (int i = 0; i < columns.size(); i++) {
+            if (i > 0) header.append(" | ");
+            String fieldKey = COLUMN_TO_FIELD_KEY.getOrDefault(columns.get(i), columns.get(i));
+            header.append(messages.get("field." + fieldKey));
+        }
+        header.append("*\n");
+
+        StringBuilder sb = new StringBuilder(header);
+        int start = Math.max(0, guesses.size() - 10);
+
+        for (int i = start; i < guesses.size(); i++) {
+            JsonObject guess = guesses.get(i).getAsJsonObject();
+            String name = guess.get("name").getAsString();
+            boolean correct = guess.get("correct").getAsBoolean();
+
+            sb.append("\n").append(correct ? "\u2705" : "\u274C").append(" **").append(name).append("**\n");
+
+            if (guess.has("comparisons") && !guess.get("comparisons").isJsonNull()) {
+                JsonObject comparisons = guess.getAsJsonObject("comparisons");
+                StringBuilder row = new StringBuilder();
+                for (String col : columns) {
+                    if (!row.isEmpty()) row.append(" | ");
+                    if (comparisons.has(col) && !comparisons.get(col).isJsonNull()) {
+                        JsonObject comp = comparisons.getAsJsonObject(col);
+                        String result = comp.has("result") ? comp.get("result").getAsString() : "wrong";
+                        String value = comp.has("value") && !comp.get("value").isJsonNull()
+                                ? comp.get("value").getAsString() : "?";
+                        row.append(resultEmoji(result)).append(" ").append(value);
+                    } else {
+                        row.append("\u2B1C ?");
+                    }
+                }
+                sb.append(row).append("\n");
+            }
+        }
+
+        String title = messages.get("guess.history_title");
+        if (start > 0) {
+            title += " (" + messages.get("guess.history_last", "count", 10) + ")";
+        }
+
+        String value = sb.toString();
+        if (value.length() > 1024) {
+            value = value.substring(0, 1020) + "...";
+        }
+
+        embed.addField(title, value, false);
+    }
+
+    private static List<String> getComparisonColumns(String mode) {
+        return switch (mode) {
+            case "classic" -> List.of("category", "tier", "stack_size", "form", "sink_points", "used_in_count");
+            case "item" -> List.of("category", "tier", "form", "stack_size", "sink_points");
+            case "building" -> List.of("category", "tier", "power_consumption");
+            case "recipe" -> List.of("building", "is_alternate", "tier");
+            case "creature" -> List.of("hostility", "biome", "type");
+            case "milestone" -> List.of("source", "tier", "unlocked_items_count");
+            default -> List.of();
+        };
+    }
+
+    private static String resultEmoji(String result) {
+        return switch (result) {
+            case "correct" -> "\uD83D\uDFE9";
+            case "higher" -> "\u2B06\uFE0F";
+            case "lower" -> "\u2B07\uFE0F";
+            case "partial" -> "\uD83D\uDFE7";
+            default -> "\uD83D\uDFE5";
+        };
     }
 }

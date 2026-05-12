@@ -45,10 +45,17 @@ public class GuessCommand {
             boolean correct = result.get("correct").getAsBoolean();
             int totalGuesses = result.get("total_guesses").getAsInt();
 
+            // Fetch full game state for guess history
+            JsonObject state = api.getState(mode, userId, locale);
+
             if (correct) {
                 JsonObject answer = result.getAsJsonObject("answer");
                 String guessWord = totalGuesses > 1 ? messages.get("common.guesses") : messages.get("common.guess");
                 EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_SUCCESS).setTitle(messages.get("guess.correct_title")).setDescription(messages.get("guess.correct_description", "name", answer.get("name").getAsString(), "count", totalGuesses, "guess_word", guessWord));
+
+                if (state.has("guesses") && state.get("guesses").isJsonArray()) {
+                    addGuessHistory(embed, state.getAsJsonArray("guesses"), mode, messages);
+                }
 
                 addAnswerFields(embed, answer, mode, messages);
 
@@ -61,6 +68,10 @@ public class GuessCommand {
             } else {
                 int guessNumber = result.get("guess_number").getAsInt();
                 EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_ERROR).setTitle(messages.get("guess.wrong_title", "name", entityName)).setDescription(messages.get("guess.wrong_description", "number", guessNumber));
+
+                if (state.has("guesses") && state.get("guesses").isJsonArray()) {
+                    addGuessHistory(embed, state.getAsJsonArray("guesses"), mode, messages);
+                }
 
                 if (result.has("hints") && !result.get("hints").isJsonNull()) {
                     addHintFields(embed, result.getAsJsonObject("hints"), messages);

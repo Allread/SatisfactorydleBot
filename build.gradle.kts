@@ -1,10 +1,11 @@
 plugins {
     id("java")
     id("application")
+    id("com.gradleup.shadow") version "9.0.0-beta12"
 }
 
 group = "fr.maxlego08.satisfactorydle"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 java {
     toolchain {
@@ -39,4 +40,14 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("")
+    archiveFileName.set("Satisfactorydle.jar")
+    destinationDirectory.set(file("target"))
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }

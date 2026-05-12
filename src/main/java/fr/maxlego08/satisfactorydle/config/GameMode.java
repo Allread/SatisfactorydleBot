@@ -2,6 +2,8 @@ package fr.maxlego08.satisfactorydle.config;
 
 public enum GameMode {
 
+    CLASSIC("classic", "Classic"),
+
     ITEM("item", "Item"),
 
     BUILDING("building", "Building"),

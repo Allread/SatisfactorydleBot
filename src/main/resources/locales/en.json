@@ -29,7 +29,9 @@
     "wrong_description": "Guess **#{number}** - Not the right answer!",
     "wrong_footer": "Use /sfdle guess to try again!",
     "already_won_title": "Already Won!",
-    "duplicate_title": "Duplicate Guess"
+    "duplicate_title": "Duplicate Guess",
+    "history_title": "Guess History",
+    "history_last": "last {count}"
   },
   "score": {
     "title": "Score - {mode} #{id}",
@@ -74,6 +76,7 @@
     "unlocked_items": "Unlocked Items",
     "description": "Description",
     "input_items": "Input Items",
-    "total_guesses": "Total Guesses"
+    "total_guesses": "Total Guesses",
+    "used_in_count": "Used In"
   }
 }

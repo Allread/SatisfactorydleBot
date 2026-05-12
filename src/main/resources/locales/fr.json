@@ -29,7 +29,9 @@
     "wrong_description": "Essai **#{number}** - Ce n'est pas la bonne reponse !",
     "wrong_footer": "Utilisez /sfdle guess pour reessayer !",
     "already_won_title": "Deja gagne !",
-    "duplicate_title": "Proposition en double"
+    "duplicate_title": "Proposition en double",
+    "history_title": "Historique des essais",
+    "history_last": "derniers {count}"
   },
   "score": {
     "title": "Score - {mode} #{id}",
@@ -74,6 +76,7 @@
     "unlocked_items": "Objets debloques",
     "description": "Description",
     "input_items": "Composants",
-    "total_guesses": "Total d'essais"
+    "total_guesses": "Total d'essais",
+    "used_in_count": "Utilise dans"
   }
 }
