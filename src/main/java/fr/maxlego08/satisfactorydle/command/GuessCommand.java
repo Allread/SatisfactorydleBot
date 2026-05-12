@@ -30,9 +30,7 @@ public class GuessCommand {
         entityCache.ensureCache(mode, locale);
 
         List<EntityCache.EntityEntry> entities = entityCache.get(key);
-        EntityCache.EntityEntry entity = entities != null
-                ? entities.stream().filter(e -> e.name().equalsIgnoreCase(entityName)).findFirst().orElse(null)
-                : null;
+        EntityCache.EntityEntry entity = entities != null ? entities.stream().filter(e -> e.name().equalsIgnoreCase(entityName)).findFirst().orElse(null) : null;
 
         if (entity == null) {
             replyError(event, messages, messages.get("error.entity_not_found", "name", entityName));
@@ -50,13 +48,7 @@ public class GuessCommand {
             if (correct) {
                 JsonObject answer = result.getAsJsonObject("answer");
                 String guessWord = totalGuesses > 1 ? messages.get("common.guesses") : messages.get("common.guess");
-                EmbedBuilder embed = new EmbedBuilder()
-                        .setColor(COLOR_SUCCESS)
-                        .setTitle(messages.get("guess.correct_title"))
-                        .setDescription(messages.get("guess.correct_description",
-                                "name", answer.get("name").getAsString(),
-                                "count", totalGuesses,
-                                "guess_word", guessWord));
+                EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_SUCCESS).setTitle(messages.get("guess.correct_title")).setDescription(messages.get("guess.correct_description", "name", answer.get("name").getAsString(), "count", totalGuesses, "guess_word", guessWord));
 
                 addAnswerFields(embed, answer, mode, messages);
 
@@ -68,10 +60,7 @@ public class GuessCommand {
                 event.getHook().editOriginalEmbeds(embed.build()).queue();
             } else {
                 int guessNumber = result.get("guess_number").getAsInt();
-                EmbedBuilder embed = new EmbedBuilder()
-                        .setColor(COLOR_ERROR)
-                        .setTitle(messages.get("guess.wrong_title", "name", entityName))
-                        .setDescription(messages.get("guess.wrong_description", "number", guessNumber));
+                EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_ERROR).setTitle(messages.get("guess.wrong_title", "name", entityName)).setDescription(messages.get("guess.wrong_description", "number", guessNumber));
 
                 if (result.has("hints") && !result.get("hints").isJsonNull()) {
                     addHintFields(embed, result.getAsJsonObject("hints"), messages);
@@ -85,10 +74,7 @@ public class GuessCommand {
                 JsonObject body = e.getBody();
                 boolean won = body.has("won") && body.get("won").getAsBoolean();
 
-                EmbedBuilder embed = new EmbedBuilder()
-                        .setColor(COLOR_WARNING)
-                        .setTitle(won ? messages.get("guess.already_won_title") : messages.get("guess.duplicate_title"))
-                        .setDescription(e.getMessage());
+                EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_WARNING).setTitle(won ? messages.get("guess.already_won_title") : messages.get("guess.duplicate_title")).setDescription(e.getMessage());
 
                 if (won && body.has("total_guesses")) {
                     embed.addField(messages.get("field.total_guesses"), String.valueOf(body.get("total_guesses").getAsInt()), true);

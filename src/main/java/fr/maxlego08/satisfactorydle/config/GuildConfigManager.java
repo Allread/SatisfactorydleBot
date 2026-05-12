@@ -1,4 +1,4 @@
-package fr.maxlego08.satisfactorydle;
+package fr.maxlego08.satisfactorydle.config;
 
 import fr.maxlego08.sarah.RequestHelper;
 
@@ -27,7 +27,7 @@ public class GuildConfigManager {
     private void loadAll() {
         List<GuildConfig> configs = requestHelper.selectAll(TABLE, GuildConfig.class);
         for (GuildConfig config : configs) {
-            cache.put(config.getGuildId(), config);
+            cache.put(config.guildId(), config);
         }
     }
 
@@ -41,7 +41,7 @@ public class GuildConfigManager {
 
     public void setLocale(String guildId, String locale) {
         GuildConfig current = getConfig(guildId);
-        GuildConfig updated = new GuildConfig(guildId, locale, current.getActiveModes());
+        GuildConfig updated = new GuildConfig(guildId, locale, current.activeModes());
         cache.put(guildId, updated);
         save(updated);
     }
@@ -55,7 +55,7 @@ public class GuildConfigManager {
             modes.remove(mode);
         }
         String activeModes = String.join(",", modes);
-        GuildConfig updated = new GuildConfig(guildId, current.getLocale(), activeModes);
+        GuildConfig updated = new GuildConfig(guildId, current.locale(), activeModes);
         cache.put(guildId, updated);
         save(updated);
     }

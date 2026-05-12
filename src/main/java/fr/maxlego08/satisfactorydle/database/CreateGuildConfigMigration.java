@@ -1,4 +1,4 @@
-package fr.maxlego08.satisfactorydle;
+package fr.maxlego08.satisfactorydle.database;
 
 import fr.maxlego08.sarah.database.Migration;
 

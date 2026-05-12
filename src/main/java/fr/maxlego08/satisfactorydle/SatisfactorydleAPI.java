@@ -3,6 +3,7 @@ package fr.maxlego08.satisfactorydle;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import fr.maxlego08.satisfactorydle.config.Config;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -48,20 +49,14 @@ public class SatisfactorydleAPI {
     }
 
     private JsonObject post(String path, JsonObject body, String locale) throws Exception {
-        HttpRequest request = newRequest(path, locale)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body)))
-                .build();
+        HttpRequest request = newRequest(path, locale).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(gson.toJson(body))).build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         return handleResponse(response);
     }
 
     private HttpRequest.Builder newRequest(String path, String locale) {
         String separator = path.contains("?") ? "&" : "?";
-        return HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + path + separator + "locale=" + locale))
-                .header("Authorization", "Bearer " + apiToken)
-                .header("Accept", "application/json");
+        return HttpRequest.newBuilder().uri(URI.create(baseUrl + path + separator + "locale=" + locale)).header("Authorization", "Bearer " + apiToken).header("Accept", "application/json");
     }
 
     private JsonObject handleResponse(HttpResponse<String> response) throws ApiException {

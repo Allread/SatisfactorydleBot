@@ -1,8 +1,8 @@
 package fr.maxlego08.satisfactorydle.command;
 
-import fr.maxlego08.satisfactorydle.GameMode;
-import fr.maxlego08.satisfactorydle.GuildConfig;
-import fr.maxlego08.satisfactorydle.GuildConfigManager;
+import fr.maxlego08.satisfactorydle.config.GameMode;
+import fr.maxlego08.satisfactorydle.config.GuildConfig;
+import fr.maxlego08.satisfactorydle.config.GuildConfigManager;
 import fr.maxlego08.satisfactorydle.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -42,10 +42,7 @@ public class ConfigCommand {
         String locale = event.getOption("locale", OptionMapping::getAsString);
         guildConfigManager.setLocale(guildId, locale);
 
-        EmbedBuilder embed = new EmbedBuilder()
-                .setColor(COLOR_SUCCESS)
-                .setTitle(messages.get("config.updated_title"))
-                .setDescription(messages.get("config.language_set", "locale", locale));
+        EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_SUCCESS).setTitle(messages.get("config.updated_title")).setDescription(messages.get("config.language_set", "locale", locale));
         applyFooter(embed, null);
         event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
@@ -56,14 +53,9 @@ public class ConfigCommand {
         guildConfigManager.setModeEnabled(guildId, mode, enabled);
 
         String modeDisplay = GameMode.fromKey(mode).getDisplay();
-        String description = enabled
-                ? messages.get("config.mode_enabled", "mode", modeDisplay)
-                : messages.get("config.mode_disabled", "mode", modeDisplay);
+        String description = enabled ? messages.get("config.mode_enabled", "mode", modeDisplay) : messages.get("config.mode_disabled", "mode", modeDisplay);
 
-        EmbedBuilder embed = new EmbedBuilder()
-                .setColor(COLOR_SUCCESS)
-                .setTitle(messages.get("config.updated_title"))
-                .setDescription(description);
+        EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_SUCCESS).setTitle(messages.get("config.updated_title")).setDescription(description);
         applyFooter(embed, null);
         event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
@@ -77,11 +69,7 @@ public class ConfigCommand {
             modes.append(active ? "✅" : "❌").append(" ").append(gm.getDisplay()).append("\n");
         }
 
-        EmbedBuilder embed = new EmbedBuilder()
-                .setColor(COLOR_INFO)
-                .setTitle(messages.get("config.show_title"))
-                .addField(messages.get("config.language_field"), config.getLocale(), true)
-                .addField(messages.get("config.modes_field"), modes.toString(), false);
+        EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_INFO).setTitle(messages.get("config.show_title")).addField(messages.get("config.language_field"), config.locale(), true).addField(messages.get("config.modes_field"), modes.toString(), false);
         applyFooter(embed, null);
         event.getHook().editOriginalEmbeds(embed.build()).queue();
     }

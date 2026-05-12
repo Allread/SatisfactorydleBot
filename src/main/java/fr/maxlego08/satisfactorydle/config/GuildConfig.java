@@ -1,4 +1,4 @@
-package fr.maxlego08.satisfactorydle;
+package fr.maxlego08.satisfactorydle.config;
 
 import fr.maxlego08.sarah.Column;
 
@@ -6,16 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class GuildConfig {
-
-    @Column(value = "guild_id", primary = true)
-    private final String guildId;
-
-    @Column("locale")
-    private final String locale;
-
-    @Column("active_modes")
-    private final String activeModes;
+public record GuildConfig(@Column(value = "guild_id", primary = true) String guildId, @Column("locale") String locale,
+                          @Column("active_modes") String activeModes) {
 
     public GuildConfig(String guildId, String locale, String activeModes) {
         this.guildId = guildId;
@@ -23,15 +15,18 @@ public class GuildConfig {
         this.activeModes = activeModes;
     }
 
-    public String getGuildId() {
+    @Override
+    public String guildId() {
         return guildId;
     }
 
-    public String getLocale() {
+    @Override
+    public String locale() {
         return locale;
     }
 
-    public String getActiveModes() {
+    @Override
+    public String activeModes() {
         return activeModes;
     }
 

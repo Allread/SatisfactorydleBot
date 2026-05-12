@@ -1,4 +1,4 @@
-package fr.maxlego08.satisfactorydle;
+package fr.maxlego08.satisfactorydle.config;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;

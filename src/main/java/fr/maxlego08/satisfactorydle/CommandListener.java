@@ -1,10 +1,9 @@
 package fr.maxlego08.satisfactorydle;
 
-import fr.maxlego08.satisfactorydle.command.ConfigCommand;
-import fr.maxlego08.satisfactorydle.command.EntityCache;
-import fr.maxlego08.satisfactorydle.command.GuessCommand;
-import fr.maxlego08.satisfactorydle.command.ScoreCommand;
-import fr.maxlego08.satisfactorydle.command.StartCommand;
+import fr.maxlego08.satisfactorydle.command.*;
+import fr.maxlego08.satisfactorydle.config.GameMode;
+import fr.maxlego08.satisfactorydle.config.GuildConfig;
+import fr.maxlego08.satisfactorydle.config.GuildConfigManager;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -62,8 +61,7 @@ public class CommandListener extends ListenerAdapter {
 
         GuildConfig guildConfig = getGuildConfig(event);
         if (guildConfig != null && !guildConfig.isModeActive(mode)) {
-            replyError(event, messages, messages.get("error.mode_disabled",
-                    "mode", GameMode.fromKey(mode).getDisplay()));
+            replyError(event, messages, messages.get("error.mode_disabled", "mode", GameMode.fromKey(mode).getDisplay()));
             return;
         }
 
@@ -90,7 +88,7 @@ public class CommandListener extends ListenerAdapter {
 
         String locale = defaultLocale;
         if (event.getGuild() != null) {
-            locale = guildConfigManager.getConfig(event.getGuild().getId()).getLocale();
+            locale = guildConfigManager.getConfig(event.getGuild().getId()).locale();
         }
 
         String key = entityCache.cacheKey(mode, locale);
@@ -103,24 +101,19 @@ public class CommandListener extends ListenerAdapter {
         }
 
         String typed = event.getFocusedOption().getValue().toLowerCase();
-        List<Command.Choice> choices = entities.stream()
-                .filter(e -> e.name().toLowerCase().contains(typed))
-                .sorted((a, b) -> {
-                    boolean aStarts = a.name().toLowerCase().startsWith(typed);
-                    boolean bStarts = b.name().toLowerCase().startsWith(typed);
-                    if (aStarts != bStarts) return aStarts ? -1 : 1;
-                    return a.name().compareToIgnoreCase(b.name());
-                })
-                .limit(25)
-                .map(e -> new Command.Choice(e.name(), e.name()))
-                .toList();
+        List<Command.Choice> choices = entities.stream().filter(e -> e.name().toLowerCase().contains(typed)).sorted((a, b) -> {
+            boolean aStarts = a.name().toLowerCase().startsWith(typed);
+            boolean bStarts = b.name().toLowerCase().startsWith(typed);
+            if (aStarts != bStarts) return aStarts ? -1 : 1;
+            return a.name().compareToIgnoreCase(b.name());
+        }).limit(25).map(e -> new Command.Choice(e.name(), e.name())).toList();
 
         event.replyChoices(choices).queue();
     }
 
     private String getLocale(SlashCommandInteractionEvent event) {
         if (event.getGuild() == null) return defaultLocale;
-        return guildConfigManager.getConfig(event.getGuild().getId()).getLocale();
+        return guildConfigManager.getConfig(event.getGuild().getId()).locale();
     }
 
     private GuildConfig getGuildConfig(SlashCommandInteractionEvent event) {

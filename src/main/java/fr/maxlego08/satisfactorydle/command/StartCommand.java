@@ -2,7 +2,7 @@ package fr.maxlego08.satisfactorydle.command;
 
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.ApiException;
-import fr.maxlego08.satisfactorydle.GameMode;
+import fr.maxlego08.satisfactorydle.config.GameMode;
 import fr.maxlego08.satisfactorydle.Messages;
 import fr.maxlego08.satisfactorydle.SatisfactorydleAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -25,9 +25,7 @@ public class StartCommand {
         entityCache.store(entityCache.cacheKey(mode, locale), daily.getAsJsonArray("entities"));
 
         String modeDisplay = GameMode.fromKey(mode).getDisplay();
-        EmbedBuilder embed = new EmbedBuilder()
-                .setColor(COLOR_INFO)
-                .setTitle(messages.get("start.title", "mode", modeDisplay));
+        EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_INFO).setTitle(messages.get("start.title", "mode", modeDisplay));
 
         try {
             JsonObject yesterday = api.getYesterday(mode, locale);

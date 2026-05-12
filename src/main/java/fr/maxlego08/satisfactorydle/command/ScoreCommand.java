@@ -3,7 +3,7 @@ package fr.maxlego08.satisfactorydle.command;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.ApiException;
-import fr.maxlego08.satisfactorydle.GameMode;
+import fr.maxlego08.satisfactorydle.config.GameMode;
 import fr.maxlego08.satisfactorydle.Messages;
 import fr.maxlego08.satisfactorydle.SatisfactorydleAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -30,9 +30,7 @@ public class ScoreCommand {
             int totalGuesses = state.get("total_guesses").getAsInt();
             int gameId = state.get("game_id").getAsInt();
 
-            EmbedBuilder embed = new EmbedBuilder()
-                    .setColor(won ? COLOR_SUCCESS : COLOR_INFO)
-                    .setTitle(messages.get("score.title", "mode", modeDisplay, "id", gameId));
+            EmbedBuilder embed = new EmbedBuilder().setColor(won ? COLOR_SUCCESS : COLOR_INFO).setTitle(messages.get("score.title", "mode", modeDisplay, "id", gameId));
 
             embed.addField(messages.get("score.status"), won ? messages.get("score.won") : messages.get("score.in_progress"), true);
             embed.addField(messages.get("score.guesses_field"), String.valueOf(totalGuesses), true);
@@ -44,9 +42,7 @@ public class ScoreCommand {
                     for (int i = 0; i < guesses.size(); i++) {
                         JsonObject g = guesses.get(i).getAsJsonObject();
                         boolean correct = g.get("correct").getAsBoolean();
-                        sb.append(i + 1).append(". ")
-                                .append(correct ? "✅" : "❌").append(" ")
-                                .append(g.get("name").getAsString()).append("\n");
+                        sb.append(i + 1).append(". ").append(correct ? "✅" : "❌").append(" ").append(g.get("name").getAsString()).append("\n");
                     }
                     embed.addField(messages.get("score.your_guesses"), sb.toString(), false);
                 }
@@ -67,10 +63,7 @@ public class ScoreCommand {
             event.getHook().editOriginalEmbeds(embed.build()).queue();
         } catch (ApiException e) {
             if (e.getStatusCode() == 404) {
-                EmbedBuilder noGameEmbed = new EmbedBuilder()
-                        .setColor(COLOR_INFO)
-                        .setTitle(messages.get("score.title_no_game", "mode", modeDisplay))
-                        .setDescription(messages.get("score.no_game"));
+                EmbedBuilder noGameEmbed = new EmbedBuilder().setColor(COLOR_INFO).setTitle(messages.get("score.title_no_game", "mode", modeDisplay)).setDescription(messages.get("score.no_game"));
                 applyFooter(noGameEmbed, null);
                 event.getHook().editOriginalEmbeds(noGameEmbed.build()).queue();
             } else {

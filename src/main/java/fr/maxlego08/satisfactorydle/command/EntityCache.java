@@ -13,11 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityCache {
 
-    public record EntityEntry(int id, String name) {}
-
     private final SatisfactorydleAPI api;
     private final Map<String, List<EntityEntry>> cache = new ConcurrentHashMap<>();
-
     public EntityCache(SatisfactorydleAPI api) {
         this.api = api;
     }
@@ -58,5 +55,8 @@ public class EntityCache {
                 }
             });
         }
+    }
+
+    public record EntityEntry(int id, String name) {
     }
 }

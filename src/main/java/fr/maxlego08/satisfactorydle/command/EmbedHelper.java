@@ -8,7 +8,7 @@ import fr.maxlego08.satisfactorydle.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import java.awt.Color;
+import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -19,24 +19,20 @@ public final class EmbedHelper {
     public static final Color COLOR_WARNING = new Color(0xFEE75C);
     public static final Color COLOR_INFO = new Color(0x5865F2);
 
-    private static final String FOOTER_ICON = "https://satisfactorydle.net/favicon.svg";
+    private static final String FOOTER_ICON = "https://satisfactorydle.net/favicon-96x96.png";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private EmbedHelper() {}
+    private EmbedHelper() {
+    }
 
     public static void applyFooter(EmbedBuilder embed, String text) {
         String date = LocalDate.now().format(DATE_FORMAT);
-        String footer = text != null && !text.isEmpty()
-                ? text + " | satisfactorydle.net | " + date
-                : "satisfactorydle.net | " + date;
+        String footer = text != null && !text.isEmpty() ? text + " | satisfactorydle.net | " + date : "satisfactorydle.net | " + date;
         embed.setFooter(footer, FOOTER_ICON);
     }
 
     public static void replyError(SlashCommandInteractionEvent event, Messages messages, String message) {
-        EmbedBuilder embed = new EmbedBuilder()
-                .setColor(COLOR_ERROR)
-                .setTitle(messages.get("error.title"))
-                .setDescription(message);
+        EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_ERROR).setTitle(messages.get("error.title")).setDescription(message);
         applyFooter(embed, null);
         event.getHook().editOriginalEmbeds(embed.build()).queue();
     }
@@ -58,8 +54,7 @@ public final class EmbedHelper {
             case "recipe" -> {
                 addFieldIfPresent(embed, messages.get("field.building"), answer, "building", true);
                 if (answer.has("is_alternate") && !answer.get("is_alternate").isJsonNull()) {
-                    embed.addField(messages.get("field.alternate"),
-                            answer.get("is_alternate").getAsBoolean() ? messages.get("common.yes") : messages.get("common.no"), true);
+                    embed.addField(messages.get("field.alternate"), answer.get("is_alternate").getAsBoolean() ? messages.get("common.yes") : messages.get("common.no"), true);
                 }
                 addInputItems(embed, answer, messages);
             }
@@ -99,8 +94,7 @@ public final class EmbedHelper {
                     unlocked.append("**Image:** ").append(messages.get("hints.image_revealed")).append("\n");
                 }
             } else if (key.equals("is_alternate")) {
-                unlocked.append("**").append(label).append(":** ")
-                        .append(value.getAsBoolean() ? messages.get("common.yes") : messages.get("common.no")).append("\n");
+                unlocked.append("**").append(label).append(":** ").append(value.getAsBoolean() ? messages.get("common.yes") : messages.get("common.no")).append("\n");
             } else if (value.isJsonArray()) {
                 unlocked.append("**").append(label).append(":** ").append(formatJsonArray(value.getAsJsonArray())).append("\n");
             } else {
@@ -114,9 +108,7 @@ public final class EmbedHelper {
                 String label = lock.get("label").getAsString();
                 int remaining = lock.get("remaining").getAsInt();
                 String guessWord = remaining > 1 ? messages.get("common.guesses") : messages.get("common.guess");
-                locked.append("**").append(label).append("** - ")
-                        .append(messages.get("hints.unlock_in", "remaining", remaining, "guess_word", guessWord))
-                        .append("\n");
+                locked.append("**").append(label).append("** - ").append(messages.get("hints.unlock_in", "remaining", remaining, "guess_word", guessWord)).append("\n");
             }
         }
 
