@@ -47,36 +47,23 @@ public class Main {
 
         JDA jda = JDABuilder.createLight(config.discordToken()).addEventListeners(listener).build().awaitReady();
 
-        var startSubcommand = new SubcommandData("start", "Start the daily challenge and see yesterday's answer")
-                .addOptions(createModeOption());
+        var startSubcommand = new SubcommandData("start", "Start the daily challenge and see yesterday's answer").addOptions(createModeOption());
 
-        var guessSubcommand = new SubcommandData("guess", "Make a guess")
-                .addOptions(createModeOption())
-                .addOption(OptionType.STRING, "entity", "The entity to guess", true, true);
+        var guessSubcommand = new SubcommandData("guess", "Make a guess").addOptions(createModeOption()).addOption(OptionType.STRING, "entity", "The entity to guess", true, true);
 
-        var scoreSubcommand = new SubcommandData("score", "View your current score and guesses")
-                .addOptions(createModeOption());
+        var scoreSubcommand = new SubcommandData("score", "View your current score and guesses").addOptions(createModeOption());
 
-        var languageSubcommand = new SubcommandData("language", "Set the language")
-                .addOptions(new OptionData(OptionType.STRING, "locale", "Language", true)
-                        .addChoice("Français", "fr")
-                        .addChoice("English", "en"));
+        var languageSubcommand = new SubcommandData("language", "Set the language").addOptions(new OptionData(OptionType.STRING, "locale", "Language", true).addChoice("Français", "fr").addChoice("English", "en"));
 
-        var modeSubcommand = new SubcommandData("mode", "Enable or disable a game mode")
-                .addOptions(createModeOption())
-                .addOption(OptionType.BOOLEAN, "enabled", "Enable or disable", true);
+        var modeSubcommand = new SubcommandData("mode", "Enable or disable a game mode").addOptions(createModeOption()).addOption(OptionType.BOOLEAN, "enabled", "Enable or disable", true);
 
         var showSubcommand = new SubcommandData("show", "Show current configuration");
 
-        var configGroup = new SubcommandGroupData("config", "Configure the bot for this server")
-                .addSubcommands(languageSubcommand, modeSubcommand, showSubcommand);
+        var configGroup = new SubcommandGroupData("config", "Configure the bot for this server").addSubcommands(languageSubcommand, modeSubcommand, showSubcommand);
 
-        jda.updateCommands().addCommands(
-                Commands.slash("sfdle", "Play Satisfactorydle.net")
-                        .addSubcommands(startSubcommand, guessSubcommand, scoreSubcommand)
-                        .addSubcommandGroups(configGroup)
-        ).queue();
+        jda.updateCommands().addCommands(Commands.slash("sfdle", "Play Satisfactorydle.net").addSubcommands(startSubcommand, guessSubcommand, scoreSubcommand).addSubcommandGroups(configGroup)).complete();
 
+        System.out.println("Commands updated successfully.");
         System.out.println("Bot is ready! Logged in as " + jda.getSelfUser().getName());
         System.out.println("Type 'stop' to shut down the bot.");
 
@@ -97,6 +84,7 @@ public class Main {
     private static OptionData createModeOption() {
         OptionData option = new OptionData(OptionType.STRING, "mode", "Game mode", true);
         for (GameMode mode : GameMode.values()) {
+            System.out.println(mode);
             option.addChoice(mode.getDisplay(), mode.getKey());
         }
         return option;
