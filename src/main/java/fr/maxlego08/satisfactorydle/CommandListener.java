@@ -6,6 +6,7 @@ import fr.maxlego08.satisfactorydle.config.GuildConfig;
 import fr.maxlego08.satisfactorydle.config.GuildConfigManager;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -26,6 +27,8 @@ public class CommandListener extends ListenerAdapter {
     private final GuessCommand guessCommand;
     private final ScoreCommand scoreCommand;
     private final ConfigCommand configCommand;
+    private final QuizCommand quizCommand;
+    private final QuizManager quizManager;
 
     public CommandListener(SatisfactorydleAPI api, GuildConfigManager guildConfigManager, MessageManager messageManager, String defaultLocale) {
         this.guildConfigManager = guildConfigManager;
@@ -37,6 +40,8 @@ public class CommandListener extends ListenerAdapter {
         this.guessCommand = new GuessCommand(api, entityCache);
         this.scoreCommand = new ScoreCommand(api);
         this.configCommand = new ConfigCommand(guildConfigManager);
+        this.quizManager = new QuizManager();
+        this.quizCommand = new QuizCommand(api, quizManager);
     }
 
     @Override
@@ -47,10 +52,24 @@ public class CommandListener extends ListenerAdapter {
         String subcommand = event.getSubcommandName();
         if (subcommand == null) return;
 
-        event.deferReply().setEphemeral(true).queue();
-
         String locale = getLocale(event);
         Messages messages = messageManager.forLocale(locale);
+
+        // Quiz handles its own defer (public reply)
+        if ("quiz".equals(subcommand)) {
+            try {
+                quizCommand.execute(event, locale, messages);
+            } catch (Exception e) {
+                if (!event.isAcknowledged()) {
+                    event.deferReply().setEphemeral(true).queue();
+                }
+                replyError(event, messages, messages.get("error.unexpected", "message", e.getMessage()));
+            }
+            return;
+        }
+
+        // All other commands are ephemeral
+        event.deferReply().setEphemeral(true).queue();
 
         if ("config".equals(group)) {
             configCommand.execute(event, subcommand, messages);
@@ -76,6 +95,20 @@ public class CommandListener extends ListenerAdapter {
         } catch (Exception e) {
             replyError(event, messages, messages.get("error.unexpected", "message", e.getMessage()));
         }
+    }
+
+    @Override
+    public void onMessageReceived(MessageReceivedEvent event) {
+        if (event.getAuthor().isBot()) return;
+        if (!event.isFromGuild()) return;
+
+        String channelId = event.getChannel().getId();
+        if (!quizManager.hasActiveQuiz(channelId)) return;
+
+        String locale = guildConfigManager.getConfig(event.getGuild().getId()).locale();
+        Messages messages = messageManager.forLocale(locale);
+
+        quizManager.handleMessage(channelId, event.getMessage().getContentRaw().trim(), event.getAuthor(), event.getChannel(), messages);
     }
 
     @Override
@@ -109,6 +142,10 @@ public class CommandListener extends ListenerAdapter {
         }).limit(25).map(e -> new Command.Choice(e.name(), e.name())).toList();
 
         event.replyChoices(choices).queue();
+    }
+
+    public void shutdown() {
+        quizManager.shutdown();
     }
 
     private String getLocale(SlashCommandInteractionEvent event) {

@@ -51,6 +51,16 @@
     "image_revealed": "Revealed",
     "unlock_in": "unlocks in {remaining} {guess_word}"
   },
+  "quiz": {
+    "title": "Quiz - Guess the Item!",
+    "description": "An item is hidden! Use the hints below to guess it.\nType your answer in the chat. You have **60 seconds**!",
+    "footer": "60 seconds to guess!",
+    "already_active": "A quiz is already active in this channel! Wait for it to finish.",
+    "winner_title": "We have a winner!",
+    "winner_description": "{user} found **{name}** in **{time}** seconds!",
+    "timeout_title": "Time's up!",
+    "timeout_description": "Nobody found the answer. It was **{name}**."
+  },
   "config": {
     "updated_title": "Configuration Updated",
     "language_set": "Language set to **{locale}**",

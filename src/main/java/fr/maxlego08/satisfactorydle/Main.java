@@ -11,6 +11,7 @@ import fr.maxlego08.satisfactorydle.config.GuildConfigManager;
 import fr.maxlego08.satisfactorydle.database.CreateGuildConfigMigration;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -45,13 +46,18 @@ public class Main {
         MessageManager messageManager = new MessageManager(config.locale());
         CommandListener listener = new CommandListener(api, guildConfigManager, messageManager, config.locale());
 
-        JDA jda = JDABuilder.createLight(config.discordToken()).addEventListeners(listener).build().awaitReady();
+        JDA jda = JDABuilder.createLight(config.discordToken())
+                .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
+                .addEventListeners(listener)
+                .build().awaitReady();
 
         var startSubcommand = new SubcommandData("start", "Start the daily challenge and see yesterday's answer").addOptions(createModeOption());
 
         var guessSubcommand = new SubcommandData("guess", "Make a guess").addOptions(createModeOption()).addOption(OptionType.STRING, "entity", "The entity to guess", true, true);
 
         var scoreSubcommand = new SubcommandData("score", "View your current score and guesses").addOptions(createModeOption());
+
+        var quizSubcommand = new SubcommandData("quiz", "Start a timed quiz - guess the item in 60 seconds!");
 
         var languageSubcommand = new SubcommandData("language", "Set the language").addOptions(new OptionData(OptionType.STRING, "locale", "Language", true).addChoice("Français", "fr").addChoice("English", "en"));
 
@@ -61,7 +67,7 @@ public class Main {
 
         var configGroup = new SubcommandGroupData("config", "Configure the bot for this server").addSubcommands(languageSubcommand, modeSubcommand, showSubcommand);
 
-        jda.updateCommands().addCommands(Commands.slash("sfdle", "Play Satisfactorydle.net").addSubcommands(startSubcommand, guessSubcommand, scoreSubcommand).addSubcommandGroups(configGroup)).complete();
+        jda.updateCommands().addCommands(Commands.slash("sfdle", "Play Satisfactorydle.net").addSubcommands(startSubcommand, guessSubcommand, scoreSubcommand, quizSubcommand).addSubcommandGroups(configGroup)).complete();
 
         System.out.println("Commands updated successfully.");
         System.out.println("Bot is ready! Logged in as " + jda.getSelfUser().getName());
@@ -72,6 +78,7 @@ public class Main {
             while ((line = reader.readLine()) != null) {
                 if (line.equalsIgnoreCase("stop")) {
                     System.out.println("Shutting down...");
+                    listener.shutdown();
                     jda.shutdown();
                     connection.disconnect();
                     System.out.println("Bot stopped.");

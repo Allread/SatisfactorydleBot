@@ -42,6 +42,10 @@ public class SatisfactorydleAPI {
         return get("/api/discord/" + mode + "/yesterday", locale);
     }
 
+    public JsonObject quizRandom(String locale) throws Exception {
+        return get("/api/discord/quiz/random", locale);
+    }
+
     private JsonObject get(String path, String locale) throws Exception {
         HttpRequest request = newRequest(path, locale).GET().build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
