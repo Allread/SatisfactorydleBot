@@ -1,4 +1,4 @@
-package fr.maxlego08.satisfactorydle.command;
+package fr.maxlego08.satisfactorydle.quiz;
 
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.Messages;
@@ -28,7 +28,8 @@ public class QuizManager {
 
     public void startQuiz(String channelId, long quizId, JsonObject entity, MessageChannelUnion channel, Messages messages) {
         String answer = entity.get("name").getAsString();
-        QuizSession session = new QuizSession(answer, entity, quizId);
+        String imageUrl = entity.get("image_url").getAsString();
+        QuizSession session = new QuizSession(answer, entity, quizId, imageUrl);
 
         ScheduledFuture<?> hintTask = scheduler.schedule(() -> sendHint(channelId, channel, messages), 30, TimeUnit.SECONDS);
         session.setHintTask(hintTask);
@@ -37,7 +38,7 @@ public class QuizManager {
         session.setTimeout(timeout);
 
         activeQuizzes.put(channelId, session);
-        System.out.println("[Quiz] Started in channel " + channelId + " — answer: " + answer);
+        System.out.println("[Quiz] Started in channel " + channelId + " - answer: " + answer);
     }
 
     public void handleMessage(String channelId, String content, User author, MessageChannelUnion channel, Messages messages) {
@@ -80,10 +81,10 @@ public class QuizManager {
         long elapsed = (System.currentTimeMillis() - session.getStartTime()) / 1000;
 
         if (winner != null) {
-            System.out.println("[Quiz] Channel " + channelId + " — " + winner.getName() + " found \"" + name + "\" in " + elapsed + "s");
+            System.out.println("[Quiz] Channel " + channelId + " - " + winner.getName() + " found \"" + name + "\" in " + elapsed + "s");
             api.quizComplete(session.getQuizId(), true, winner.getId());
         } else {
-            System.out.println("[Quiz] Channel " + channelId + " — timeout, answer was \"" + name + "\"");
+            System.out.println("[Quiz] Channel " + channelId + " - timeout, answer was \"" + name + "\"");
             api.quizComplete(session.getQuizId(), false, null);
         }
 
@@ -99,10 +100,7 @@ public class QuizManager {
                     .setTitle(messages.get("quiz.timeout_title"))
                     .setDescription(messages.get("quiz.timeout_description", "name", name));
         }
-
-        if (hasValue(entity, "image_url")) {
-            embed.setImage(entity.get("image_url").getAsString());
-        }
+        embed.setThumbnail(session.getImageUrl());
 
         applyFooter(embed, null);
         channel.sendMessageEmbeds(embed.build()).queue();

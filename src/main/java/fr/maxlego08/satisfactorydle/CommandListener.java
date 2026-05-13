@@ -4,6 +4,7 @@ import fr.maxlego08.satisfactorydle.command.*;
 import fr.maxlego08.satisfactorydle.config.GameMode;
 import fr.maxlego08.satisfactorydle.config.GuildConfig;
 import fr.maxlego08.satisfactorydle.config.GuildConfigManager;
+import fr.maxlego08.satisfactorydle.quiz.QuizManager;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

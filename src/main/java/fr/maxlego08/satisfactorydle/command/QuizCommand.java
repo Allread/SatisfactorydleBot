@@ -3,6 +3,7 @@ package fr.maxlego08.satisfactorydle.command;
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.Messages;
 import fr.maxlego08.satisfactorydle.SatisfactorydleAPI;
+import fr.maxlego08.satisfactorydle.quiz.QuizManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -38,10 +39,7 @@ public class QuizCommand {
 
         quizManager.startQuiz(channelId, quizId, entity, event.getChannel(), messages);
 
-        EmbedBuilder embed = new EmbedBuilder()
-                .setColor(COLOR_INFO)
-                .setTitle(messages.get("quiz.title"))
-                .setDescription(messages.get("quiz.description"));
+        EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_INFO).setTitle(messages.get("quiz.title")).setDescription(messages.get("quiz.description"));
 
         addFieldIfPresent(embed, messages.get("field.category"), entity, "category", true);
         addFieldIfPresent(embed, messages.get("field.tier"), entity, "tier", true);

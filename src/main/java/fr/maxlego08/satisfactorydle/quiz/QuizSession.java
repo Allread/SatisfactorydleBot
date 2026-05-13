@@ -1,4 +1,4 @@
-package fr.maxlego08.satisfactorydle.command;
+package fr.maxlego08.satisfactorydle.quiz;
 
 import com.google.gson.JsonObject;
 
@@ -10,30 +10,32 @@ public class QuizSession {
     private final JsonObject entity;
     private final long startTime;
     private final long quizId;
+    private final String imageUrl;
     private ScheduledFuture<?> timeout;
     private ScheduledFuture<?> hintTask;
 
-    public QuizSession(String answer, JsonObject entity, long quizId) {
+    public QuizSession(String answer, JsonObject entity, long quizId, String imageUrl) {
         this.answer = answer;
         this.entity = entity;
         this.quizId = quizId;
+        this.imageUrl = imageUrl;
         this.startTime = System.currentTimeMillis();
     }
 
     public String getAnswer() {
-        return answer;
+        return this.answer;
     }
 
     public JsonObject getEntity() {
-        return entity;
+        return this.entity;
     }
 
     public long getStartTime() {
-        return startTime;
+        return this.startTime;
     }
 
     public ScheduledFuture<?> getTimeout() {
-        return timeout;
+        return this.timeout;
     }
 
     public void setTimeout(ScheduledFuture<?> timeout) {
@@ -41,7 +43,7 @@ public class QuizSession {
     }
 
     public ScheduledFuture<?> getHintTask() {
-        return hintTask;
+        return this.hintTask;
     }
 
     public void setHintTask(ScheduledFuture<?> hintTask) {
@@ -49,6 +51,10 @@ public class QuizSession {
     }
 
     public long getQuizId() {
-        return quizId;
+        return this.quizId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 }
