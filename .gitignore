@@ -1,1 +1,8 @@
-﻿.gradle
+.gradle
+build/
+config.json
+.idea/
+*.iml
+.claude
+CLAUDE.md
+target

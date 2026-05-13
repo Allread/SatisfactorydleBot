@@ -1,0 +1,94 @@
+{
+  "error": {
+    "title": "Error",
+    "unexpected": "An unexpected error occurred: {message}",
+    "mode_disabled": "The **{mode}** mode is disabled on this server.\nAn administrator can enable it with `/sfdle config mode`.",
+    "entity_not_found": "\"{name}\" is not in the list.\nUse autocomplete to select a valid entity.",
+    "no_permission": "You need the **Manage Server** permission to configure the bot."
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "guess": "guess",
+    "guesses": "guesses"
+  },
+  "start": {
+    "title": "Satisfactorydle - {mode}",
+    "yesterday_field": "Yesterday's Answer (#{id})",
+    "yesterday_none": "No puzzle from yesterday.",
+    "today_field": "Today's Challenge",
+    "today_text": "Game **#{id}** is ready!\nUse `/sfdle guess` to make your first guess.",
+    "clue_prefix": "\n\n**Clue:** {clue}",
+    "footer": "Good luck!"
+  },
+  "guess": {
+    "correct_title": "Correct!",
+    "correct_description": "You found **{name}** in **{count}** {guess_word}!",
+    "correct_footer": "Congratulations! Come back tomorrow for a new challenge.",
+    "wrong_title": "Wrong - {name}",
+    "wrong_description": "Guess **#{number}** - Not the right answer!",
+    "wrong_footer": "Use /sfdle guess to try again!",
+    "already_won_title": "Already Won!",
+    "duplicate_title": "Duplicate Guess",
+    "history_title": "Guess History",
+    "history_last": "last {count}"
+  },
+  "score": {
+    "title": "Score - {mode} #{id}",
+    "title_no_game": "Score - {mode}",
+    "no_game": "You haven't started today's challenge yet!\nUse `/sfdle start` to see today's puzzle.",
+    "status": "Status",
+    "won": "Won!",
+    "in_progress": "In Progress",
+    "guesses_field": "Guesses",
+    "your_guesses": "Your Guesses",
+    "footer_won": "Come back tomorrow!",
+    "footer_playing": "Use /sfdle guess to continue!"
+  },
+  "hints": {
+    "title": "Hints",
+    "locked_title": "Locked Hints",
+    "image_revealed": "Revealed",
+    "unlock_in": "unlocks in {remaining} {guess_word}"
+  },
+  "quiz": {
+    "title": "Quiz - Guess the Item!",
+    "description": "An item is hidden! Use the hints below to guess it.\nType your answer in the chat. You have **60 seconds**!",
+    "footer": "60 seconds to guess!",
+    "already_active": "A quiz is already active in this channel! Wait for it to finish.",
+    "winner_title": "We have a winner!",
+    "winner_description": "{user} found **{name}** in **{time}** seconds!",
+    "hint_title": "Hint - 30 seconds left!",
+    "hint_footer": "30 seconds remaining!",
+    "timeout_title": "Time's up!",
+    "timeout_description": "Nobody found the answer. It was **{name}**."
+  },
+  "config": {
+    "updated_title": "Configuration Updated",
+    "language_set": "Language set to **{locale}**",
+    "mode_enabled": "Mode **{mode}** is now enabled",
+    "mode_disabled": "Mode **{mode}** is now disabled",
+    "show_title": "Server Configuration",
+    "language_field": "Language",
+    "modes_field": "Active Modes"
+  },
+  "field": {
+    "category": "Category",
+    "tier": "Tier",
+    "form": "Form",
+    "stack_size": "Stack Size",
+    "sink_points": "Sink Points",
+    "power": "Power",
+    "building": "Building",
+    "alternate": "Alternate",
+    "hostility": "Hostility",
+    "biome": "Biome",
+    "type": "Type",
+    "source": "Source",
+    "unlocked_items": "Unlocked Items",
+    "description": "Description",
+    "input_items": "Input Items",
+    "total_guesses": "Total Guesses",
+    "used_in_count": "Used In"
+  }
+}
