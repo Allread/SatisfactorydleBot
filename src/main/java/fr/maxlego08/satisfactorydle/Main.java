@@ -91,7 +91,6 @@ public class Main {
     private static OptionData createModeOption() {
         OptionData option = new OptionData(OptionType.STRING, "mode", "Game mode", true);
         for (GameMode mode : GameMode.values()) {
-            System.out.println(mode);
             option.addChoice(mode.getDisplay(), mode.getKey());
         }
         return option;
