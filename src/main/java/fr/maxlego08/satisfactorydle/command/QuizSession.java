@@ -9,11 +9,14 @@ public class QuizSession {
     private final String answer;
     private final JsonObject entity;
     private final long startTime;
+    private final long quizId;
     private ScheduledFuture<?> timeout;
+    private ScheduledFuture<?> hintTask;
 
-    public QuizSession(String answer, JsonObject entity) {
+    public QuizSession(String answer, JsonObject entity, long quizId) {
         this.answer = answer;
         this.entity = entity;
+        this.quizId = quizId;
         this.startTime = System.currentTimeMillis();
     }
 
@@ -35,5 +38,17 @@ public class QuizSession {
 
     public void setTimeout(ScheduledFuture<?> timeout) {
         this.timeout = timeout;
+    }
+
+    public ScheduledFuture<?> getHintTask() {
+        return hintTask;
+    }
+
+    public void setHintTask(ScheduledFuture<?> hintTask) {
+        this.hintTask = hintTask;
+    }
+
+    public long getQuizId() {
+        return quizId;
     }
 }

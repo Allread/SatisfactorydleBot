@@ -103,7 +103,9 @@ public final class EmbedHelper {
             JsonElement value = hints.get(key);
             if (value == null || value.isJsonNull()) continue;
 
-            String label = formatLabel(key);
+            String fieldKey = COLUMN_TO_FIELD_KEY.getOrDefault(key, key);
+            String label = messages.get("field." + fieldKey);
+            if (label.equals("field." + fieldKey)) label = formatLabel(key);
 
             if (key.equals("reveal_image")) {
                 if (value.getAsBoolean() && hasValue(hints, "image_url")) {

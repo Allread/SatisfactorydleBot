@@ -29,10 +29,14 @@ public class QuizCommand {
 
         event.deferReply().setEphemeral(false).queue();
 
-        JsonObject result = api.quizRandom(locale);
+        String guildId = event.getGuild() != null ? event.getGuild().getId() : "DM";
+        String userId = event.getUser().getId();
+
+        JsonObject result = api.quizStart(guildId, channelId, userId, locale);
+        long quizId = result.get("quiz_id").getAsLong();
         JsonObject entity = result.getAsJsonObject("entity");
 
-        quizManager.startQuiz(channelId, entity, event.getChannel(), messages);
+        quizManager.startQuiz(channelId, quizId, entity, event.getChannel(), messages);
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(COLOR_INFO)

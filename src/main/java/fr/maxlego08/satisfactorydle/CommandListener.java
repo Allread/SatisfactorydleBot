@@ -40,7 +40,7 @@ public class CommandListener extends ListenerAdapter {
         this.guessCommand = new GuessCommand(api, entityCache);
         this.scoreCommand = new ScoreCommand(api);
         this.configCommand = new ConfigCommand(guildConfigManager);
-        this.quizManager = new QuizManager();
+        this.quizManager = new QuizManager(api);
         this.quizCommand = new QuizCommand(api, quizManager);
     }
 

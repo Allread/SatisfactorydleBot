@@ -58,6 +58,8 @@
     "already_active": "A quiz is already active in this channel! Wait for it to finish.",
     "winner_title": "We have a winner!",
     "winner_description": "{user} found **{name}** in **{time}** seconds!",
+    "hint_title": "Hint - 30 seconds left!",
+    "hint_footer": "30 seconds remaining!",
     "timeout_title": "Time's up!",
     "timeout_description": "Nobody found the answer. It was **{name}**."
   },

@@ -42,8 +42,23 @@ public class SatisfactorydleAPI {
         return get("/api/discord/" + mode + "/yesterday", locale);
     }
 
-    public JsonObject quizRandom(String locale) throws Exception {
-        return get("/api/discord/quiz/random", locale);
+    public JsonObject quizStart(String guildId, String channelId, String userId, String locale) throws Exception {
+        JsonObject body = new JsonObject();
+        body.addProperty("guild_id", guildId);
+        body.addProperty("channel_id", channelId);
+        body.addProperty("discord_user_id", userId);
+        return post("/api/discord/quiz/start", body, locale);
+    }
+
+    public void quizComplete(long quizId, boolean won, String winnerUserId) {
+        JsonObject body = new JsonObject();
+        body.addProperty("won", won);
+        if (winnerUserId != null) body.addProperty("winner_discord_user_id", winnerUserId);
+        try {
+            post("/api/discord/quiz/" + quizId + "/complete", body, "en");
+        } catch (Exception e) {
+            System.out.println("[Quiz] Failed to send quiz result: " + e.getMessage());
+        }
     }
 
     private JsonObject get(String path, String locale) throws Exception {
