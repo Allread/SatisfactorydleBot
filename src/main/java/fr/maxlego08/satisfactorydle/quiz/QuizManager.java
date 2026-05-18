@@ -3,6 +3,7 @@ package fr.maxlego08.satisfactorydle.quiz;
 import com.google.gson.JsonObject;
 import fr.maxlego08.satisfactorydle.Messages;
 import fr.maxlego08.satisfactorydle.SatisfactorydleAPI;
+import fr.maxlego08.satisfactorydle.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
@@ -45,7 +46,7 @@ public class QuizManager {
         QuizSession session = activeQuizzes.get(channelId);
         if (session == null) return;
 
-        if (content.equalsIgnoreCase(session.getAnswer())) {
+        if (StringUtils.normalize(content).equals(StringUtils.normalize(session.getAnswer()))) {
             session.getTimeout().cancel(false);
             if (session.getHintTask() != null) session.getHintTask().cancel(false);
             endQuiz(channelId, channel, author, messages);

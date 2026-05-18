@@ -15,6 +15,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import java.util.Collections;
 import java.util.List;
 
+import static fr.maxlego08.satisfactorydle.StringUtils.normalize;
+
 import static fr.maxlego08.satisfactorydle.command.EmbedHelper.replyError;
 
 public class CommandListener extends ListenerAdapter {
@@ -134,10 +136,10 @@ public class CommandListener extends ListenerAdapter {
             return;
         }
 
-        String typed = event.getFocusedOption().getValue().toLowerCase();
-        List<Command.Choice> choices = entities.stream().filter(e -> e.name().toLowerCase().contains(typed)).sorted((a, b) -> {
-            boolean aStarts = a.name().toLowerCase().startsWith(typed);
-            boolean bStarts = b.name().toLowerCase().startsWith(typed);
+        String typed = normalize(event.getFocusedOption().getValue());
+        List<Command.Choice> choices = entities.stream().filter(e -> normalize(e.name()).contains(typed)).sorted((a, b) -> {
+            boolean aStarts = normalize(a.name()).startsWith(typed);
+            boolean bStarts = normalize(b.name()).startsWith(typed);
             if (aStarts != bStarts) return aStarts ? -1 : 1;
             return a.name().compareToIgnoreCase(b.name());
         }).limit(25).map(e -> new Command.Choice(e.name(), e.name())).toList();

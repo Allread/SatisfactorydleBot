@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import java.util.List;
 
+import static fr.maxlego08.satisfactorydle.StringUtils.normalize;
 import static fr.maxlego08.satisfactorydle.command.EmbedHelper.*;
 
 public class GuessCommand {
@@ -30,7 +31,7 @@ public class GuessCommand {
         entityCache.ensureCache(mode, locale);
 
         List<EntityCache.EntityEntry> entities = entityCache.get(key);
-        EntityCache.EntityEntry entity = entities != null ? entities.stream().filter(e -> e.name().equalsIgnoreCase(entityName)).findFirst().orElse(null) : null;
+        EntityCache.EntityEntry entity = entities != null ? entities.stream().filter(e -> normalize(e.name()).equals(normalize(entityName))).findFirst().orElse(null) : null;
 
         if (entity == null) {
             replyError(event, messages, messages.get("error.entity_not_found", "name", entityName));
