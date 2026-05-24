@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "fr.maxlego08.satisfactorydle"
-version = "1.1"
+version = "1.2"
 
 java {
     toolchain {
@@ -44,7 +44,7 @@ tasks.test {
 
 tasks.shadowJar {
     archiveClassifier.set("")
-    archiveFileName.set("Satisfactorydle.jar")
+    archiveFileName.set("Satisfactorydle-${project.version}.jar")
     destinationDirectory.set(file("target"))
 }
 
