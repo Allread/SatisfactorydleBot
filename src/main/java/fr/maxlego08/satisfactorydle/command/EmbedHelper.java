@@ -117,7 +117,9 @@ public final class EmbedHelper {
             } else if (value.isJsonArray()) {
                 unlocked.append("**").append(label).append(":** ").append(formatJsonArray(value.getAsJsonArray())).append("\n");
             } else {
-                unlocked.append("**").append(label).append(":** ").append(jsonToString(value, messages)).append("\n");
+                String display = jsonToString(value, messages);
+                if ("tier".equals(key)) display = formatTierValue(display);
+                unlocked.append("**").append(label).append(":** ").append(display).append("\n");
             }
         }
 
@@ -156,7 +158,9 @@ public final class EmbedHelper {
 
     public static void addFieldIfPresent(EmbedBuilder embed, String label, JsonObject json, String key, boolean inline) {
         if (hasValue(json, key)) {
-            embed.addField(label, jsonToStringRaw(json.get(key)), inline);
+            String value = jsonToStringRaw(json.get(key));
+            if ("tier".equals(key)) value = formatTierValue(value);
+            embed.addField(label, value, inline);
         }
     }
 
@@ -239,6 +243,7 @@ public final class EmbedHelper {
                         String result = comp.has("result") ? comp.get("result").getAsString() : "wrong";
                         String value = comp.has("value") && !comp.get("value").isJsonNull()
                                 ? comp.get("value").getAsString() : "?";
+                        if ("tier".equals(col)) value = formatTierValue(value);
                         row.append(resultEmoji(result)).append(" ").append(value);
                     } else {
                         row.append("\u2B1C ?");
@@ -271,6 +276,10 @@ public final class EmbedHelper {
             case "milestone" -> List.of("source", "tier", "unlocked_items_count");
             default -> List.of();
         };
+    }
+
+    private static String formatTierValue(String value) {
+        return "-1".equals(value) ? "MAM" : value;
     }
 
     private static String resultEmoji(String result) {
