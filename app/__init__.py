@@ -1,0 +1,1 @@
+"""Satisfactorydle bot Python package."""
