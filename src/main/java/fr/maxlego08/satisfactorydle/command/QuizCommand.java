@@ -37,9 +37,12 @@ public class QuizCommand {
         long quizId = result.get("quiz_id").getAsLong();
         JsonObject entity = result.getAsJsonObject("entity");
 
-        quizManager.startQuiz(channelId, quizId, entity, event.getChannel(), messages);
+        quizManager.startQuiz(guildId, channelId, userId, locale, quizId, entity, event.getChannel(), messages);
 
-        EmbedBuilder embed = new EmbedBuilder().setColor(COLOR_INFO).setTitle(messages.get("quiz.title")).setDescription(messages.get("quiz.description"));
+        EmbedBuilder embed = new EmbedBuilder()
+                .setColor(COLOR_INFO)
+                .setTitle(messages.get("quiz.title"))
+                .setDescription(messages.get("quiz.description"));
 
         addFieldIfPresent(embed, messages.get("field.category"), entity, "category", true);
         addFieldIfPresent(embed, messages.get("field.tier"), entity, "tier", true);

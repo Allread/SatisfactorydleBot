@@ -11,14 +11,24 @@ public class QuizSession {
     private final long startTime;
     private final long quizId;
     private final String imageUrl;
+
+    // Contexte pour relancer automatiquement un quiz
+    private final String guildId;
+    private final String starterUserId;
+    private final String locale;
+
     private ScheduledFuture<?> timeout;
     private ScheduledFuture<?> hintTask;
 
-    public QuizSession(String answer, JsonObject entity, long quizId, String imageUrl) {
+    public QuizSession(String answer, JsonObject entity, long quizId, String imageUrl,
+                       String guildId, String starterUserId, String locale) {
         this.answer = answer;
         this.entity = entity;
         this.quizId = quizId;
         this.imageUrl = imageUrl;
+        this.guildId = guildId;
+        this.starterUserId = starterUserId;
+        this.locale = locale;
         this.startTime = System.currentTimeMillis();
     }
 
@@ -56,5 +66,17 @@ public class QuizSession {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public String getGuildId() {
+        return guildId;
+    }
+
+    public String getStarterUserId() {
+        return starterUserId;
+    }
+
+    public String getLocale() {
+        return locale;
     }
 }

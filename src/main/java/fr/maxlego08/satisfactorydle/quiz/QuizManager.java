@@ -15,6 +15,9 @@ import static fr.maxlego08.satisfactorydle.command.EmbedHelper.*;
 
 public class QuizManager {
 
+    private static final int QUIZ_TIMEOUT_SECONDS = 60;
+    private static final int QUIZ_HINT_SECONDS = 30;
+
     private final SatisfactorydleAPI api;
     private final Map<String, QuizSession> activeQuizzes = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -27,15 +30,17 @@ public class QuizManager {
         return activeQuizzes.containsKey(channelId);
     }
 
-    public void startQuiz(String channelId, long quizId, JsonObject entity, MessageChannelUnion channel, Messages messages) {
+    public void startQuiz(String guildId, String channelId, String starterUserId, String locale,
+                          long quizId, JsonObject entity, MessageChannelUnion channel, Messages messages) {
         String answer = entity.get("name").getAsString();
         String imageUrl = entity.get("image_url").getAsString();
-        QuizSession session = new QuizSession(answer, entity, quizId, imageUrl);
 
-        ScheduledFuture<?> hintTask = scheduler.schedule(() -> sendHint(channelId, channel, messages), 30, TimeUnit.SECONDS);
+        QuizSession session = new QuizSession(answer, entity, quizId, imageUrl, guildId, starterUserId, locale);
+
+        ScheduledFuture<?> hintTask = scheduler.schedule(() -> sendHint(channelId, channel, messages), QUIZ_HINT_SECONDS, TimeUnit.SECONDS);
         session.setHintTask(hintTask);
 
-        ScheduledFuture<?> timeout = scheduler.schedule(() -> endQuiz(channelId, channel, null, messages), 60, TimeUnit.SECONDS);
+        ScheduledFuture<?> timeout = scheduler.schedule(() -> endQuiz(channelId, channel, null, messages), QUIZ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         session.setTimeout(timeout);
 
         activeQuizzes.put(channelId, session);
@@ -47,7 +52,7 @@ public class QuizManager {
         if (session == null) return;
 
         if (StringUtils.normalize(content).equals(StringUtils.normalize(session.getAnswer()))) {
-            session.getTimeout().cancel(false);
+            if (session.getTimeout() != null) session.getTimeout().cancel(false);
             if (session.getHintTask() != null) session.getHintTask().cancel(false);
             endQuiz(channelId, channel, author, messages);
         }
@@ -105,6 +110,53 @@ public class QuizManager {
 
         applyFooter(embed, null);
         channel.sendMessageEmbeds(embed.build()).queue();
+
+        // Si quelqu'un trouve: on enchaîne automatiquement un nouveau quiz
+        if (winner != null) {
+            startNextQuiz(session, channelId, channel, messages);
+        }
+        // Si timeout: arrêt (pas de relance)
+    }
+
+    private void startNextQuiz(QuizSession previousSession, String channelId, MessageChannelUnion channel, Messages messages) {
+        try {
+            JsonObject result = api.quizStart(
+                    previousSession.getGuildId(),
+                    channelId,
+                    previousSession.getStarterUserId(),
+                    previousSession.getLocale()
+            );
+
+            long quizId = result.get("quiz_id").getAsLong();
+            JsonObject entity = result.getAsJsonObject("entity");
+
+            startQuiz(
+                    previousSession.getGuildId(),
+                    channelId,
+                    previousSession.getStarterUserId(),
+                    previousSession.getLocale(),
+                    quizId,
+                    entity,
+                    channel,
+                    messages
+            );
+
+            // Affiche la nouvelle question
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setColor(COLOR_INFO)
+                    .setTitle(messages.get("quiz.title"))
+                    .setDescription(messages.get("quiz.description"));
+
+            addFieldIfPresent(embed, messages.get("field.category"), entity, "category", true);
+            addFieldIfPresent(embed, messages.get("field.tier"), entity, "tier", true);
+            addFieldIfPresent(embed, messages.get("field.form"), entity, "form", true);
+
+            applyFooter(embed, messages.get("quiz.footer"));
+            channel.sendMessageEmbeds(embed.build()).queue();
+
+        } catch (Exception e) {
+            System.out.println("[Quiz] Failed to start next quiz in channel " + channelId + ": " + e.getMessage());
+        }
     }
 
     public void shutdown() {
