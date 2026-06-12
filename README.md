@@ -15,34 +15,76 @@ Discord bot for [Satisfactorydle](https://satisfactorydle.net) - a Wordle-style 
 
 ## Requirements
 
-- Java 21+
+- Python 3.12+
 - A Discord bot token
 - A Satisfactorydle API token (generate one at [satisfactorydle.net/settings/api](https://satisfactorydle.net/settings/api))
 
 ## Setup
 
 1. Clone the repository
-2. Build the project:
+2. Create and activate a virtual environment
+3. Install dependencies:
    ```bash
-   ./gradlew build
+   pip install -e .[dev]
    ```
-3. Run once to generate the default `config.json`:
-   ```bash
-   java -jar target/Satisfactorydle.jar
-   ```
-4. Edit `config.json` with your credentials:
-   ```json
-   {
-     "discord_token": "YOUR_DISCORD_BOT_TOKEN",
-     "api_url": "https://satisfactorydle.net",
-     "api_token": "YOUR_API_TOKEN",
-     "locale": "fr"
-   }
+4. Copy `.env.example` to `.env` and fill your values:
+   ```env
+   DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN
+   API_URL=https://satisfactorydle.net
+   API_TOKEN=YOUR_API_TOKEN
+   DEFAULT_LOCALE=fr
+   SQLITE_PATH=./sfdle.db
+   LOG_LEVEL=INFO
    ```
 5. Start the bot:
    ```bash
-   java -jar target/Satisfactorydle.jar
+   satisfactorydle-bot
    ```
+
+## Docker
+
+Build image:
+
+```bash
+docker build -t satisfactorydle-bot:latest .
+```
+
+Run container:
+
+```bash
+docker run -d --name satisfactorydle-bot \
+  -e DISCORD_TOKEN=YOUR_DISCORD_BOT_TOKEN \
+  -e API_URL=https://satisfactorydle.net \
+  -e API_TOKEN=YOUR_API_TOKEN \
+  -e DEFAULT_LOCALE=fr \
+  -e SQLITE_PATH=/data/sfdle.db \
+  -v $(pwd)/data:/data \
+  satisfactorydle-bot:latest
+```
+
+## CI/CD Deployment
+
+GitHub Actions workflow: `.github/workflows/deploy.yml`
+
+- `ci`: lint (`ruff`) + tests (`pytest`)
+- `build-and-push`: build and push Docker image to GHCR
+- `deploy`: SSH deploy to VPS and container restart
+
+Required repository secrets:
+
+- `DEPLOY_HOST`
+- `DEPLOY_USER`
+- `DEPLOY_SSH_KEY`
+- `DISCORD_TOKEN`
+- `API_URL`
+- `API_TOKEN`
+- `DEFAULT_LOCALE`
+
+## Cutover and Rollback
+
+- Cutover checklist: `ops/cutover-checklist.md`
+- Rollback runbook: `ops/rollback.md`
+- Python operations guide: `ops/python-operations.md`
 
 ## Commands
 
@@ -58,40 +100,36 @@ Discord bot for [Satisfactorydle](https://satisfactorydle.net) - a Wordle-style 
 
 ## Tech Stack
 
-- **Java 21** - Gradle (Kotlin DSL)
-- **[JDA 5.2.2](https://github.com/discord-jda/JDA)** - Discord API wrapper
-- **[Gson](https://github.com/google/gson)** - JSON parsing
-- **[Sarah](https://repo.groupez.dev)** - SQLite database ORM
-- **java.net.http.HttpClient** - API communication
+- **Python 3.12**
+- **[discord.py](https://github.com/Rapptz/discord.py)** - Discord API wrapper
+- **[httpx](https://www.python-httpx.org/)** - async API communication
+- **[aiosqlite](https://github.com/omnilib/aiosqlite)** - SQLite async access
+- **[pytest](https://pytest.org/)** + **ruff** - quality pipeline
 
 ## Project Structure
 
 ```
-src/main/java/fr/maxlego08/satisfactorydle/
-├── Main.java                  # Entry point, JDA initialization
-├── CommandListener.java       # Slash command & autocomplete handler
-├── SatisfactorydleAPI.java    # HTTP client for the Satisfactorydle API
-├── MessageManager.java        # i18n message loading
-├── Messages.java              # Message accessor
-├── ApiException.java          # API error wrapper
-├── command/
-│   ├── StartCommand.java      # /sfdle start
-│   ├── GuessCommand.java      # /sfdle guess
-│   ├── ScoreCommand.java      # /sfdle score
-│   ├── QuizCommand.java       # /sfdle quiz
-│   ├── ConfigCommand.java     # /sfdle config
-│   ├── EmbedHelper.java       # Shared embed building utilities
-│   └── EntityCache.java       # Cached entity list for autocomplete
+app/
+├── main.py                        # Entry point
+├── bot/client.py                  # discord.py client & event wiring
+├── api/satisfactorydle_api.py     # HTTP client for Satisfactorydle API
+├── i18n/message_manager.py        # i18n message loader/accessor
+├── locales/                       # en/fr locale files
+├── commands/
+│   ├── handlers.py                # /sfdle command handlers
+│   ├── embed_helper.py            # Shared embed utilities
+│   └── entity_cache.py            # Cached entity list for autocomplete
 ├── quiz/
-│   ├── QuizManager.java       # Quiz lifecycle (start, hint, timeout)
-│   └── QuizSession.java       # Active quiz session state
-├── config/
-│   ├── Config.java            # config.json loader
-│   ├── GameMode.java          # Game mode enum
-│   ├── GuildConfig.java       # Per-guild configuration DTO
-│   └── GuildConfigManager.java# Guild config CRUD with in-memory cache
-└── database/
-    └── CreateGuildConfigMigration.java  # SQLite schema migration
+│   ├── quiz_manager.py            # Quiz lifecycle (start, hint, timeout, auto-restart)
+│   └── session.py                 # Active quiz session state
+├── storage/
+│   ├── sqlite.py                  # DB init
+│   └── guild_config_manager.py    # Guild config CRUD with in-memory cache
+└── domain/
+    ├── game_mode.py
+    └── guild_config.py
+tests/
+└── ...
 ```
 
 ## License
